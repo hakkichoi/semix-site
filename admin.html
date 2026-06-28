@@ -176,60 +176,109 @@
     overflow-y: auto;
     background: var(--bg);
   }
-  .main-panel h2 { font-size: 16px; font-weight: 700; margin-bottom: 20px; }
-  .listings-table {
+  .main-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  .main-panel-header h2 { font-size: 16px; font-weight: 700; }
+  .listing-count {
+    font-size: 13px;
+    color: var(--ink-light);
+    background: var(--canvas);
+    border: 1px solid var(--hairline);
+    border-radius: 20px;
+    padding: 3px 12px;
+  }
+
+  /* 카드 목록 */
+  .listings-table { display: flex; flex-direction: column; gap: 12px; }
+
+  .listing-item {
     background: var(--canvas);
     border: 1px solid var(--hairline);
     border-radius: var(--radius);
-    overflow: hidden;
+    border-left: 4px solid var(--blue);
+    padding: 20px 20px 20px 20px;
+    position: relative;
+    transition: border-color 0.15s, box-shadow 0.15s;
   }
-  .table-header {
-    display: grid;
-    grid-template-columns: 80px 1fr 100px 100px 80px;
-    padding: 10px 16px;
-    background: #f7f8fa;
-    border-bottom: 1px solid var(--hairline);
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--ink-light);
+  .listing-item:hover { border-color: var(--blue); box-shadow: 0 2px 8px rgba(0,86,179,0.08); }
+  .listing-item-buy { border-left-color: #27ae60; }
+
+  .listing-item-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
   }
-  .table-row {
-    display: grid;
-    grid-template-columns: 80px 1fr 100px 100px 80px;
-    padding: 14px 16px;
-    border-bottom: 1px solid var(--hairline);
-    align-items: center;
-    transition: background 0.15s;
-    font-size: 14px;
-  }
-  .table-row:last-child { border-bottom: none; }
-  .table-row:hover { background: #f7f8fa; }
+  .listing-item-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; flex: 1; min-width: 0; }
   .row-badge {
-    font-size: 11px; font-weight: 700; padding: 2px 8px;
-    border-radius: 2px; display: inline-block;
+    font-size: 11px; font-weight: 700; padding: 3px 10px;
+    border-radius: 2px; display: inline-block; flex-shrink: 0;
     text-transform: uppercase; letter-spacing: 0.06em;
   }
   .badge-sell { background: #edf2fb; color: var(--blue); }
   .badge-buy  { background: #f0faf0; color: #1a7a1a; }
-  .row-title { font-weight: 600; }
-  .row-date  { font-size: 13px; color: var(--ink-light); }
-  .row-body  { font-size: 13px; color: var(--ink-light); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .btn-delete {
-    background: none; border: none;
-    color: #ccc; cursor: pointer;
-    font-size: 18px; font-weight: 700;
-    padding: 4px 8px;
-    border-radius: 2px;
-    transition: color 0.15s, background 0.15s;
+  .listing-item-title {
+    font-size: 15px; font-weight: 700; color: var(--ink);
+    word-break: break-word;
   }
-  .btn-delete:hover { color: var(--danger); background: #fff5f5; }
+  .listing-item-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+  .listing-item-date { font-size: 12px; color: #aaa; white-space: nowrap; }
+
+  /* 본문 전체 표시 */
+  .listing-item-body {
+    font-size: 14px;
+    color: var(--ink-light);
+    line-height: 1.7;
+    white-space: pre-wrap;
+    word-break: break-word;
+    background: #f7f8fa;
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    margin-bottom: 0;
+  }
+
+  /* 접기/펼치기 */
+  .toggle-body {
+    background: none; border: none;
+    font-size: 12px; font-weight: 700;
+    color: var(--blue); cursor: pointer;
+    padding: 0; margin-top: 10px;
+    display: block;
+    letter-spacing: 0.03em;
+  }
+  .toggle-body:hover { text-decoration: underline; }
+
+  .btn-delete {
+    background: none;
+    border: 1px solid #e0e0e0;
+    color: #bbb; cursor: pointer;
+    font-size: 13px; font-weight: 700;
+    padding: 5px 12px;
+    border-radius: var(--radius);
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .btn-delete:hover { color: var(--danger); border-color: var(--danger); background: #fff5f5; }
+
   .empty-state {
     text-align: center; padding: 60px 20px;
     color: var(--ink-light); font-size: 15px;
+    background: var(--canvas);
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius);
   }
   .loading-state { text-align: center; padding: 40px; color: var(--ink-light); }
+
+  @media (max-width: 768px) {
+    .admin-layout { grid-template-columns: 1fr; height: auto; }
+    .sidebar { border-right: none; border-bottom: 1px solid var(--hairline); }
+  }
 
   /* Toast */
   .toast {
@@ -246,13 +295,7 @@
   .toast.success { background: #27ae60; }
   .toast.error   { background: var(--danger); }
 
-  @media (max-width: 768px) {
-    .admin-layout { grid-template-columns: 1fr; height: auto; }
-    .sidebar { border-right: none; border-bottom: 1px solid var(--hairline); }
-    .table-header, .table-row { grid-template-columns: 80px 1fr 80px; }
-    .table-header .col-body, .table-row .col-body,
-    .table-header .col-date, .table-row .col-date { display: none; }
-  }
+
 </style>
 </head>
 <body>
@@ -323,7 +366,10 @@
 
     <!-- Main panel -->
     <div class="main-panel">
-      <h2>등록된 매물 목록</h2>
+      <div class="main-panel-header">
+        <h2>등록된 매물 목록</h2>
+        <span class="listing-count" id="listingCount"></span>
+      </div>
       <div class="listings-table" id="listingsTable">
         <div class="loading-state">불러오는 중...</div>
       </div>
@@ -464,7 +510,9 @@ document.getElementById('clearBtn').addEventListener('click', () => {
 // ── Load Listings ──
 async function loadListings() {
   const table = document.getElementById('listingsTable');
+  const countEl = document.getElementById('listingCount');
   table.innerHTML = '<div class="loading-state">불러오는 중...</div>';
+  if (countEl) countEl.textContent = '';
   try {
     const res = await fetch(
       `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/issues?labels=${LABEL_LISTING}&state=open&per_page=50`,
@@ -474,42 +522,44 @@ async function loadListings() {
 
     if (!Array.isArray(issues) || issues.length === 0) {
       table.innerHTML = '<div class="empty-state">등록된 매물이 없습니다.</div>';
+      if (countEl) countEl.textContent = '0건';
       return;
     }
 
-    table.innerHTML = `
-      <div class="table-header">
-        <span>유형</span>
-        <span>제목</span>
-        <span class="col-body">내용 미리보기</span>
-        <span class="col-date">등록일</span>
-        <span>삭제</span>
-      </div>
-    `;
+    if (countEl) countEl.textContent = `총 ${issues.length}건`;
+    table.innerHTML = '';
 
     issues.forEach(issue => {
       const isSell = issue.labels.some(l => l.name === 'sell');
       const isBuy  = issue.labels.some(l => l.name === 'buy');
       const date   = new Date(issue.created_at).toLocaleDateString('ko-KR');
-      const preview = (issue.body || '').substring(0, 60).replace(/\n/g, ' ');
-      const row = document.createElement('div');
-      row.className = 'table-row';
-      row.innerHTML = `
-        <span>
-          ${isSell ? '<span class="row-badge badge-sell">판매</span>' : ''}
-          ${isBuy  ? '<span class="row-badge badge-buy">구매</span>'  : ''}
-        </span>
-        <span class="row-title">${escHtml(issue.title)}</span>
-        <span class="row-body col-body">${escHtml(preview)}${issue.body && issue.body.length > 60 ? '…' : ''}</span>
-        <span class="row-date col-date">${date}</span>
-        <span><button class="btn-delete" data-id="${issue.number}" title="삭제">×</button></span>
+      const bodyText = (issue.body || '').trim();
+
+      const card = document.createElement('div');
+      card.className = 'listing-item' + (isBuy ? ' listing-item-buy' : '');
+
+      card.innerHTML = `
+        <div class="listing-item-header">
+          <div class="listing-item-left">
+            ${isSell ? '<span class="row-badge badge-sell">판매</span>' : ''}
+            ${isBuy  ? '<span class="row-badge badge-buy">구매</span>'  : ''}
+            <span class="listing-item-title">${escHtml(issue.title)}</span>
+          </div>
+          <div class="listing-item-actions">
+            <span class="listing-item-date">${date}</span>
+            <button class="btn-delete" data-id="${issue.number}">삭제</button>
+          </div>
+        </div>
+        ${bodyText
+          ? `<div class="listing-item-body">${escHtml(bodyText)}</div>`
+          : `<div class="listing-item-body" style="color:#bbb;font-style:italic;">내용 없음</div>`
+        }
       `;
-      table.appendChild(row);
+
+      card.querySelector('.btn-delete').addEventListener('click', () => deleteListing(issue.number));
+      table.appendChild(card);
     });
 
-    table.querySelectorAll('.btn-delete').forEach(btn => {
-      btn.addEventListener('click', () => deleteListing(btn.dataset.id));
-    });
   } catch (e) {
     table.innerHTML = '<div class="empty-state">매물 정보를 불러오지 못했습니다.</div>';
   }
