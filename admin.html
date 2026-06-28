@@ -229,6 +229,30 @@
   .listing-item-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
   .listing-item-date { font-size: 12px; color: #aaa; white-space: nowrap; }
 
+  /* 조회수 행 */
+  .vc-row {
+    display: flex; align-items: center; gap: 10px;
+    margin-top: 12px; padding-top: 12px;
+    border-top: 1px solid var(--hairline);
+    flex-wrap: wrap;
+  }
+  .vc-label { font-size: 12px; color: var(--ink-light); font-weight: 700; }
+  .vc-count { font-size: 16px; font-weight: 700; color: var(--blue); min-width: 36px; }
+  .vc-controls { display: flex; gap: 6px; align-items: center; margin-left: auto; }
+  .vc-input {
+    width: 80px; border: 1px solid var(--hairline); border-radius: var(--radius);
+    padding: 5px 8px; font-size: 13px; font-family: inherit;
+    color: var(--ink); text-align: center; outline: none; transition: border-color 0.2s;
+  }
+  .vc-input:focus { border-color: var(--blue); }
+  .vc-set-btn {
+    background: var(--blue); color: #fff; border: none;
+    border-radius: var(--radius); padding: 5px 12px;
+    font-size: 12px; font-weight: 700; font-family: inherit;
+    cursor: pointer; transition: background 0.2s; white-space: nowrap;
+  }
+  .vc-set-btn:hover { background: var(--blue-dark); }
+
   /* 본문 전체 표시 */
   .listing-item-body {
     font-size: 14px;
@@ -381,8 +405,8 @@
 
 <script>
 // ── Config ── (index.html과 동일하게 맞추세요)
-const GITHUB_OWNER = 'hakkichoi';  // ← 변경 필요
-const GITHUB_REPO  = 'semix-site';            // ← 변경 필요
+const GITHUB_OWNER = 'hakkichoi';
+const GITHUB_REPO  = 'semix-site';
 const LABEL_LISTING = 'listing';
 const TOKEN_KEY     = 'semix_admin_token';
 
@@ -508,6 +532,10 @@ document.getElementById('clearBtn').addEventListener('click', () => {
 });
 
 // ── Load Listings ──
+const VC_PREFIX = 'semix_vc_';
+function getVC(n) { return parseInt(localStorage.getItem(VC_PREFIX + n) || '0', 10); }
+function setVC(n, v) { localStorage.setItem(VC_PREFIX + n, Math.max(0, parseInt(v)||0)); }
+
 async function loadListings() {
   const table = document.getElementById('listingsTable');
   const countEl = document.getElementById('listingCount');
@@ -534,6 +562,7 @@ async function loadListings() {
       const isBuy  = issue.labels.some(l => l.name === 'buy');
       const date   = new Date(issue.created_at).toLocaleDateString('ko-KR');
       const bodyText = (issue.body || '').trim();
+      const vc = getVC(issue.number);
 
       const card = document.createElement('div');
       card.className = 'listing-item' + (isBuy ? ' listing-item-buy' : '');
@@ -554,9 +583,23 @@ async function loadListings() {
           ? `<div class="listing-item-body">${escHtml(bodyText)}</div>`
           : `<div class="listing-item-body" style="color:#bbb;font-style:italic;">내용 없음</div>`
         }
+        <div class="vc-row">
+          <span class="vc-label">👁 조회수</span>
+          <span class="vc-count" id="vc-${issue.number}">${vc}</span>
+          <div class="vc-controls">
+            <input type="number" class="vc-input" id="vc-input-${issue.number}" value="${vc}" min="0" />
+            <button class="vc-set-btn" data-issue="${issue.number}">적용</button>
+          </div>
+        </div>
       `;
 
       card.querySelector('.btn-delete').addEventListener('click', () => deleteListing(issue.number));
+      card.querySelector('.vc-set-btn').addEventListener('click', () => {
+        const val = parseInt(document.getElementById('vc-input-' + issue.number).value) || 0;
+        setVC(issue.number, val);
+        document.getElementById('vc-' + issue.number).textContent = val;
+        showToast(`조회수가 ${val}로 설정되었습니다.`, 'success');
+      });
       table.appendChild(card);
     });
 
