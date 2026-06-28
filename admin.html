@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SEMIX Admin — 매물 관리</title>
+<link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --blue:      #0056b3;
+    --blue-dark: #003d82;
+    --canvas:    #ffffff;
+    --bg:        #f4f6fa;
+    --hairline:  #e0e0e0;
+    --ink:       #212121;
+    --ink-light: #555;
+    --radius:    4px;
+    --danger:    #c0392b;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', sans-serif; background: var(--bg); color: var(--ink); min-height: 100vh; }
+
+  /* ── Login Screen ── */
+  #loginScreen {
+    min-height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+    background: #1a1a1a;
+  }
+  .login-box {
+    background: #232323;
+    border: 1px solid #333;
+    border-radius: var(--radius);
+    padding: 48px 40px;
+    width: 100%;
+    max-width: 380px;
+  }
+  .login-logo { font-size: 24px; font-weight: 700; color: #fff; letter-spacing: 0.08em; margin-bottom: 8px; }
+  .login-logo span { color: var(--blue); }
+  .login-sub { font-size: 13px; color: #666; margin-bottom: 32px; }
+  .login-box label { display: block; font-size: 12px; font-weight: 700; color: #999; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 8px; }
+  .login-box input {
+    width: 100%;
+    background: #1a1a1a;
+    border: 1px solid #444;
+    border-radius: var(--radius);
+    padding: 12px 14px;
+    font-size: 14px;
+    color: #fff;
+    font-family: inherit;
+    outline: none;
+    margin-bottom: 16px;
+    transition: border-color 0.2s;
+  }
+  .login-box input:focus { border-color: var(--blue); }
+  .btn-login {
+    width: 100%;
+    background: var(--blue);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius);
+    padding: 14px;
+    font-size: 15px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.2s;
+    margin-top: 4px;
+  }
+  .btn-login:hover { background: var(--blue-dark); }
+  .login-error { color: #e74c3c; font-size: 13px; margin-top: 12px; display: none; text-align: center; }
+  .login-notice {
+    margin-top: 24px;
+    font-size: 12px;
+    color: #555;
+    line-height: 1.6;
+    background: #1a1a1a;
+    border: 1px solid #333;
+    border-radius: var(--radius);
+    padding: 12px;
+  }
+
+  /* ── Admin UI ── */
+  #adminUI { display: none; }
+  .topbar {
+    background: #1a1a1a;
+    border-bottom: 1px solid #333;
+    padding: 0 32px;
+    height: 60px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .topbar-logo { font-size: 18px; font-weight: 700; color: #fff; letter-spacing: 0.08em; }
+  .topbar-logo span { color: var(--blue); }
+  .topbar-right { display: flex; gap: 12px; align-items: center; }
+  .topbar-user { font-size: 13px; color: #888; }
+  .btn-sm {
+    padding: 7px 16px;
+    border-radius: var(--radius);
+    font-size: 13px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.2s;
+    border: none;
+  }
+  .btn-primary-sm { background: var(--blue); color: #fff; }
+  .btn-primary-sm:hover { background: var(--blue-dark); }
+  .btn-danger-sm { background: transparent; color: var(--danger); border: 1px solid var(--danger); }
+  .btn-danger-sm:hover { background: var(--danger); color: #fff; }
+  .btn-ghost { background: transparent; color: #888; border: 1px solid #444; }
+  .btn-ghost:hover { border-color: #888; color: #fff; }
+
+  .admin-layout {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 0;
+    height: calc(100vh - 60px);
+  }
+
+  /* ── Sidebar / Form ── */
+  .sidebar {
+    background: var(--canvas);
+    border-right: 1px solid var(--hairline);
+    padding: 24px;
+    overflow-y: auto;
+  }
+  .sidebar h2 { font-size: 16px; font-weight: 700; margin-bottom: 20px; }
+  .form-row { margin-bottom: 16px; }
+  .form-row label { display: block; font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-light); margin-bottom: 6px; }
+  .form-row input,
+  .form-row select,
+  .form-row textarea {
+    width: 100%;
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius);
+    padding: 10px 12px;
+    font-size: 14px;
+    font-family: inherit;
+    color: var(--ink);
+    background: var(--canvas);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .form-row input:focus,
+  .form-row select:focus,
+  .form-row textarea:focus { border-color: var(--blue); }
+  .form-row textarea { min-height: 140px; resize: vertical; }
+  .form-actions { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
+  .btn-full { width: 100%; padding: 12px; border-radius: var(--radius); font-size: 14px; font-weight: 700; font-family: inherit; cursor: pointer; border: none; transition: background 0.2s; }
+  .btn-full.primary { background: var(--blue); color: #fff; }
+  .btn-full.primary:hover { background: var(--blue-dark); }
+  .btn-full.ghost { background: transparent; color: var(--ink-light); border: 1px solid var(--hairline); }
+  .btn-full.ghost:hover { border-color: #aaa; }
+
+  .token-section {
+    margin-top: 28px;
+    padding-top: 24px;
+    border-top: 1px solid var(--hairline);
+  }
+  .token-section h3 { font-size: 13px; font-weight: 700; color: var(--ink-light); margin-bottom: 12px; letter-spacing: 0.04em; }
+  .token-status {
+    font-size: 12px;
+    padding: 10px 12px;
+    border-radius: var(--radius);
+    background: #f7f8fa;
+    border: 1px solid var(--hairline);
+    color: var(--ink-light);
+    margin-bottom: 10px;
+    word-break: break-all;
+  }
+  .token-ok   { border-color: #27ae60; color: #27ae60; background: #f0faf0; }
+  .token-fail { border-color: #e74c3c; color: #e74c3c; background: #fff5f5; }
+
+  /* ── Main / Listings ── */
+  .main-panel {
+    padding: 24px;
+    overflow-y: auto;
+    background: var(--bg);
+  }
+  .main-panel h2 { font-size: 16px; font-weight: 700; margin-bottom: 20px; }
+  .listings-table {
+    background: var(--canvas);
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .table-header {
+    display: grid;
+    grid-template-columns: 80px 1fr 100px 100px 80px;
+    padding: 10px 16px;
+    background: #f7f8fa;
+    border-bottom: 1px solid var(--hairline);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-light);
+  }
+  .table-row {
+    display: grid;
+    grid-template-columns: 80px 1fr 100px 100px 80px;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--hairline);
+    align-items: center;
+    transition: background 0.15s;
+    font-size: 14px;
+  }
+  .table-row:last-child { border-bottom: none; }
+  .table-row:hover { background: #f7f8fa; }
+  .row-badge {
+    font-size: 11px; font-weight: 700; padding: 2px 8px;
+    border-radius: 2px; display: inline-block;
+    text-transform: uppercase; letter-spacing: 0.06em;
+  }
+  .badge-sell { background: #edf2fb; color: var(--blue); }
+  .badge-buy  { background: #f0faf0; color: #1a7a1a; }
+  .row-title { font-weight: 600; }
+  .row-date  { font-size: 13px; color: var(--ink-light); }
+  .row-body  { font-size: 13px; color: var(--ink-light); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .btn-delete {
+    background: none; border: none;
+    color: #ccc; cursor: pointer;
+    font-size: 18px; font-weight: 700;
+    padding: 4px 8px;
+    border-radius: 2px;
+    transition: color 0.15s, background 0.15s;
+  }
+  .btn-delete:hover { color: var(--danger); background: #fff5f5; }
+  .empty-state {
+    text-align: center; padding: 60px 20px;
+    color: var(--ink-light); font-size: 15px;
+  }
+  .loading-state { text-align: center; padding: 40px; color: var(--ink-light); }
+
+  /* Toast */
+  .toast {
+    position: fixed; bottom: 24px; right: 24px;
+    background: var(--ink); color: #fff;
+    padding: 14px 22px; border-radius: var(--radius);
+    font-size: 14px; font-weight: 600;
+    z-index: 999; opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.3s, transform 0.3s;
+    pointer-events: none;
+  }
+  .toast.show { opacity: 1; transform: translateY(0); }
+  .toast.success { background: #27ae60; }
+  .toast.error   { background: var(--danger); }
+
+  @media (max-width: 768px) {
+    .admin-layout { grid-template-columns: 1fr; height: auto; }
+    .sidebar { border-right: none; border-bottom: 1px solid var(--hairline); }
+    .table-header, .table-row { grid-template-columns: 80px 1fr 80px; }
+    .table-header .col-body, .table-row .col-body,
+    .table-header .col-date, .table-row .col-date { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── Login ── -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">SEMI<span>X</span> <span style="font-size:14px; color:#666; font-weight:400;">Admin</span></div>
+    <div class="login-sub">매물 관리 패널 — 관리자 전용</div>
+
+    <label for="loginToken">GitHub Personal Access Token</label>
+    <input type="password" id="loginToken" placeholder="ghp_xxxxxxxxxxxx" autocomplete="current-password" />
+
+    <button class="btn-login" id="loginBtn">로그인</button>
+    <div class="login-error" id="loginError">토큰이 유효하지 않거나 권한이 없습니다.</div>
+
+    <div class="login-notice">
+      <strong style="color:#888;">🔑 토큰 발급 방법</strong><br />
+      GitHub → Settings → Developer settings → Personal access tokens → Fine-grained tokens<br />
+      <br />권한: <strong style="color:#888;">Issues: Read &amp; Write</strong>
+    </div>
+  </div>
+</div>
+
+<!-- ── Admin UI ── -->
+<div id="adminUI">
+  <div class="topbar">
+    <div class="topbar-logo">SEMI<span>X</span> <span style="font-size:13px; color:#555; font-weight:400; margin-left:8px;">Admin Panel</span></div>
+    <div class="topbar-right">
+      <span class="topbar-user" id="topbarUser"></span>
+      <a href="index.html" class="btn-sm btn-ghost" style="color:#888; text-decoration:none;">← 사이트 보기</a>
+      <button class="btn-sm btn-ghost" id="logoutBtn">로그아웃</button>
+    </div>
+  </div>
+
+  <div class="admin-layout">
+    <!-- Form sidebar -->
+    <div class="sidebar">
+      <h2>새 매물 등록</h2>
+      <div class="form-row">
+        <label>유형</label>
+        <select id="listingType">
+          <option value="sell">판매 (Sell)</option>
+          <option value="buy">구매 (Buy)</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label>제목 *</label>
+        <input type="text" id="listingTitle" placeholder="예: NVIDIA H100 SXM5 8-GPU 서버 판매" />
+      </div>
+      <div class="form-row">
+        <label>내용 *</label>
+        <textarea id="listingBody" placeholder="품목, 수량, 사양, 조건 등 상세 내용을 입력하세요."></textarea>
+      </div>
+      <div class="form-actions">
+        <button class="btn-full primary" id="submitBtn">매물 등록</button>
+        <button class="btn-full ghost" id="clearBtn">초기화</button>
+      </div>
+
+      <div class="token-section">
+        <h3>연결 상태</h3>
+        <div class="token-status" id="tokenStatus">확인 중...</div>
+        <div style="font-size:12px; color:#aaa; line-height:1.6; margin-top:8px;">
+          매물은 GitHub Issues에 저장되며 홈페이지에 실시간 반영됩니다.
+        </div>
+      </div>
+    </div>
+
+    <!-- Main panel -->
+    <div class="main-panel">
+      <h2>등록된 매물 목록</h2>
+      <div class="listings-table" id="listingsTable">
+        <div class="loading-state">불러오는 중...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── Config ── (index.html과 동일하게 맞추세요)
+const GITHUB_OWNER = 'YOUR_GITHUB_USERNAME';  // ← 변경 필요
+const GITHUB_REPO  = 'semix-site';            // ← 변경 필요
+const LABEL_LISTING = 'listing';
+const TOKEN_KEY     = 'semix_admin_token';
+
+let GH_TOKEN = '';
+
+// ── Auth ──
+function savedToken() { return sessionStorage.getItem(TOKEN_KEY) || ''; }
+
+async function verifyToken(token) {
+  const res = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}`, {
+    headers: { Authorization: `token ${token}`, Accept: 'application/vnd.github.v3+json' }
+  });
+  return res.ok;
+}
+
+document.getElementById('loginBtn').addEventListener('click', async () => {
+  const token = document.getElementById('loginToken').value.trim();
+  if (!token) return;
+  document.getElementById('loginBtn').textContent = '확인 중...';
+  const ok = await verifyToken(token);
+  if (ok) {
+    GH_TOKEN = token;
+    sessionStorage.setItem(TOKEN_KEY, token);
+    showAdmin();
+  } else {
+    document.getElementById('loginError').style.display = 'block';
+    document.getElementById('loginBtn').textContent = '로그인';
+  }
+});
+document.getElementById('loginToken').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('loginBtn').click();
+});
+
+document.getElementById('logoutBtn').addEventListener('click', () => {
+  sessionStorage.removeItem(TOKEN_KEY);
+  GH_TOKEN = '';
+  document.getElementById('adminUI').style.display = 'none';
+  document.getElementById('loginScreen').style.display = 'flex';
+});
+
+async function showAdmin() {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('adminUI').style.display = 'block';
+  setTokenStatus();
+  await loadListings();
+  fetchUsername();
+}
+
+async function fetchUsername() {
+  try {
+    const res = await fetch('https://api.github.com/user', {
+      headers: { Authorization: `token ${GH_TOKEN}` }
+    });
+    const data = await res.json();
+    document.getElementById('topbarUser').textContent = data.login || '';
+  } catch (_) {}
+}
+
+function setTokenStatus() {
+  const el = document.getElementById('tokenStatus');
+  el.textContent = `✓ 연결됨 — ${GITHUB_OWNER}/${GITHUB_REPO}`;
+  el.className = 'token-status token-ok';
+}
+
+// ── API Helpers ──
+function ghHeaders() {
+  return {
+    Authorization: `token ${GH_TOKEN}`,
+    Accept: 'application/vnd.github.v3+json',
+    'Content-Type': 'application/json'
+  };
+}
+
+async function ensureLabel(name, color) {
+  try {
+    await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/labels`, {
+      method: 'POST',
+      headers: ghHeaders(),
+      body: JSON.stringify({ name, color: color.replace('#',''), description: '' })
+    });
+  } catch (_) {}
+}
+
+// ── Create Listing ──
+document.getElementById('submitBtn').addEventListener('click', async () => {
+  const title = document.getElementById('listingTitle').value.trim();
+  const body  = document.getElementById('listingBody').value.trim();
+  const type  = document.getElementById('listingType').value;
+  if (!title) { showToast('제목을 입력하세요.', 'error'); return; }
+  if (!body)  { showToast('내용을 입력하세요.', 'error'); return; }
+
+  document.getElementById('submitBtn').textContent = '등록 중...';
+  document.getElementById('submitBtn').disabled = true;
+
+  try {
+    await ensureLabel(LABEL_LISTING, '0056b3');
+    await ensureLabel('sell', '0056b3');
+    await ensureLabel('buy',  '27ae60');
+
+    const labels = [LABEL_LISTING, type];
+    const res = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/issues`, {
+      method: 'POST',
+      headers: ghHeaders(),
+      body: JSON.stringify({ title, body, labels })
+    });
+    if (!res.ok) throw new Error();
+
+    showToast('매물이 등록되었습니다.', 'success');
+    document.getElementById('listingTitle').value = '';
+    document.getElementById('listingBody').value  = '';
+    await loadListings();
+  } catch (e) {
+    showToast('등록 중 오류가 발생했습니다.', 'error');
+  } finally {
+    document.getElementById('submitBtn').textContent = '매물 등록';
+    document.getElementById('submitBtn').disabled = false;
+  }
+});
+
+document.getElementById('clearBtn').addEventListener('click', () => {
+  document.getElementById('listingTitle').value = '';
+  document.getElementById('listingBody').value  = '';
+});
+
+// ── Load Listings ──
+async function loadListings() {
+  const table = document.getElementById('listingsTable');
+  table.innerHTML = '<div class="loading-state">불러오는 중...</div>';
+  try {
+    const res = await fetch(
+      `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/issues?labels=${LABEL_LISTING}&state=open&per_page=50`,
+      { headers: ghHeaders() }
+    );
+    const issues = await res.json();
+
+    if (!Array.isArray(issues) || issues.length === 0) {
+      table.innerHTML = '<div class="empty-state">등록된 매물이 없습니다.</div>';
+      return;
+    }
+
+    table.innerHTML = `
+      <div class="table-header">
+        <span>유형</span>
+        <span>제목</span>
+        <span class="col-body">내용 미리보기</span>
+        <span class="col-date">등록일</span>
+        <span>삭제</span>
+      </div>
+    `;
+
+    issues.forEach(issue => {
+      const isSell = issue.labels.some(l => l.name === 'sell');
+      const isBuy  = issue.labels.some(l => l.name === 'buy');
+      const date   = new Date(issue.created_at).toLocaleDateString('ko-KR');
+      const preview = (issue.body || '').substring(0, 60).replace(/\n/g, ' ');
+      const row = document.createElement('div');
+      row.className = 'table-row';
+      row.innerHTML = `
+        <span>
+          ${isSell ? '<span class="row-badge badge-sell">판매</span>' : ''}
+          ${isBuy  ? '<span class="row-badge badge-buy">구매</span>'  : ''}
+        </span>
+        <span class="row-title">${escHtml(issue.title)}</span>
+        <span class="row-body col-body">${escHtml(preview)}${issue.body && issue.body.length > 60 ? '…' : ''}</span>
+        <span class="row-date col-date">${date}</span>
+        <span><button class="btn-delete" data-id="${issue.number}" title="삭제">×</button></span>
+      `;
+      table.appendChild(row);
+    });
+
+    table.querySelectorAll('.btn-delete').forEach(btn => {
+      btn.addEventListener('click', () => deleteListing(btn.dataset.id));
+    });
+  } catch (e) {
+    table.innerHTML = '<div class="empty-state">매물 정보를 불러오지 못했습니다.</div>';
+  }
+}
+
+// ── Delete Listing ──
+async function deleteListing(issueNumber) {
+  if (!confirm('이 매물을 삭제(닫기)하시겠습니까?')) return;
+  try {
+    const res = await fetch(
+      `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/issues/${issueNumber}`,
+      { method: 'PATCH', headers: ghHeaders(), body: JSON.stringify({ state: 'closed' }) }
+    );
+    if (!res.ok) throw new Error();
+    showToast('매물이 삭제되었습니다.', 'success');
+    await loadListings();
+  } catch (e) {
+    showToast('삭제 중 오류가 발생했습니다.', 'error');
+  }
+}
+
+function escHtml(str) {
+  return String(str)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast ${type} show`;
+  setTimeout(() => { t.className = 'toast'; }, 3500);
+}
+
+// ── Auto-login if token is in session ──
+const existing = savedToken();
+if (existing) {
+  GH_TOKEN = existing;
+  verifyToken(existing).then(ok => {
+    if (ok) showAdmin();
+    else { sessionStorage.removeItem(TOKEN_KEY); GH_TOKEN = ''; }
+  });
+}
+</script>
+</body>
+</html>
