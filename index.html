@@ -635,18 +635,36 @@ function closeMobile() { document.getElementById('mobileMenu').classList.remove(
 const GITHUB_OWNER = 'hakkichoi';
 const GITHUB_REPO  = 'semix-site';
 const GITHUB_LABEL = 'listing';
-const VC_PREFIX    = 'semix_vc_';   // localStorage key prefix for view counts
 
 // ══════════════════════════════════
-// View Count helpers (localStorage)
+// CountAPI — 전 기기 공유 조회수
+// 기본 URL: https://countapi.mileshilliard.com/api/v1
+// 키 형식: semix-site-issue-{issueNumber}
 // ══════════════════════════════════
-function getVC(issueNum) {
-  return parseInt(localStorage.getItem(VC_PREFIX + issueNum) || '0', 10);
+const COUNT_BASE = 'https://countapi.mileshilliard.com/api/v1';
+
+function vcKey(issueNum) {
+  return `semix-site-issue-${issueNum}`;
 }
-function incVC(issueNum) {
-  const n = getVC(issueNum) + 1;
-  localStorage.setItem(VC_PREFIX + issueNum, n);
-  return n;
+
+// 현재 조회수 조회 (증가 없음)
+async function getVC(issueNum) {
+  try {
+    const res = await fetch(`${COUNT_BASE}/get/${vcKey(issueNum)}`);
+    if (!res.ok) return 0;
+    const data = await res.json();
+    return parseInt(data.value || 0, 10);
+  } catch { return 0; }
+}
+
+// 조회수 +1 증가 후 새 값 반환
+async function incVC(issueNum) {
+  try {
+    const res = await fetch(`${COUNT_BASE}/hit/${vcKey(issueNum)}`);
+    if (!res.ok) return 0;
+    const data = await res.json();
+    return parseInt(data.value || 0, 10);
+  } catch { return 0; }
 }
 
 // ══════════════════════════════════
@@ -673,26 +691,30 @@ async function loadListings() {
   }
 }
 
-function renderListings(issues) {
+async function renderListings(issues) {
   const container = document.getElementById('listingsContainer');
   if (issues.length === 0) {
     container.className = '';
     container.innerHTML = `<div class="listing-empty">${t('listings.empty').replace(/\n/g,'<br/>')}</div>`;
     return;
   }
+
+  // 먼저 카드 골격 그리기 (조회수는 — 로 표시 후 비동기 채움)
   const grid = document.createElement('div');
   grid.className = 'listings-grid';
+
   issues.forEach(issue => {
     const isSell = issue.labels.some(l => l.name === 'sell');
     const isBuy  = issue.labels.some(l => l.name === 'buy');
     const dateStr = new Date(issue.created_at).toLocaleDateString(
       currentLang === 'zh' ? 'zh-CN' : currentLang === 'en' ? 'en-US' : 'ko-KR'
     );
-    const vc = getVC(issue.number);
     const badgeLabel = isSell ? t('badge.sell') : isBuy ? t('badge.buy') : t('badge.reg');
     const badgeClass = isSell ? 'badge-sell' : isBuy ? 'badge-buy' : 'badge-sell';
+
     const card = document.createElement('div');
     card.className = 'listing-card';
+    card.id = `card-${issue.number}`;
     card.innerHTML = `
       <span class="listing-badge ${badgeClass}">${badgeLabel}</span>
       <h3>${escHtml(issue.title)}</h3>
@@ -701,20 +723,32 @@ function renderListings(issues) {
         <span class="listing-date">${dateStr}</span>
         <span class="listing-views">
           <svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zm0 12.5c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
-          <span class="vc-num">${vc}</span>
+          <span class="vc-num" id="vc-${issue.number}">—</span>
         </span>
       </div>
     `;
-    card.addEventListener('click', () => {
-      const newVC = incVC(issue.number);
-      card.querySelector('.vc-num').textContent = newVC;
+
+    // 카드 클릭 → 조회수 +1 (CountAPI hit) → 모달 열기
+    card.addEventListener('click', async () => {
+      const newVC = await incVC(issue.number);
+      const vcEl = document.getElementById(`vc-${issue.number}`);
+      if (vcEl) vcEl.textContent = newVC;
       openModal(issue, isSell, isBuy, dateStr, newVC);
     });
+
     grid.appendChild(card);
   });
+
   container.className = '';
   container.innerHTML = '';
   container.appendChild(grid);
+
+  // 카드 렌더 후 조회수를 비동기로 채우기
+  issues.forEach(async issue => {
+    const vc = await getVC(issue.number);
+    const el = document.getElementById(`vc-${issue.number}`);
+    if (el) el.textContent = vc;
+  });
 }
 
 function openModal(issue, isSell, isBuy, dateStr, vc) {
