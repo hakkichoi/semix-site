@@ -1,0 +1,11 @@
+# robots.txt — semix.co.kr
+# KMC FOUNDATION
+
+User-agent: *
+Allow: /
+
+# 관리자 페이지는 검색 엔진에서 제외
+Disallow: /admin.html
+
+# Sitemap 위치 명시
+Sitemap: https://semix.co.kr/sitemap.xml
