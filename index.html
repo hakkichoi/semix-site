@@ -479,6 +479,11 @@
     <button class="modal-close" id="modalClose">×</button>
     <div id="modalBadge"></div>
     <h2 id="modalTitle"></h2>
+    <!-- 번역 로딩 표시 -->
+    <div id="modalTranslating" style="display:none;font-size:12px;color:#aaa;margin-bottom:8px;display:flex;align-items:center;gap:6px;">
+      <span style="display:inline-block;width:10px;height:10px;border:2px solid #ddd;border-top-color:var(--blue);border-radius:50%;animation:spin 0.7s linear infinite;"></span>
+      <span id="modalTranslatingText">번역 중...</span>
+    </div>
     <div class="modal-body" id="modalBody"></div>
     <div class="modal-meta">
       <div id="modalDate" style="font-size:12px;color:#aaa;"></div>
@@ -487,9 +492,12 @@
         <span id="modalViewCount">0</span>
       </div>
     </div>
-    <a href="#contact" class="btn-primary" style="display:inline-block;margin-top:16px;" id="modalContactBtn" onclick="document.getElementById('listingModal').classList.remove('open')">이 매물 문의하기</a>
+    <button class="btn-primary" style="display:inline-block;margin-top:16px;width:100%;border:none;cursor:pointer;" id="modalContactBtn">이 매물 문의하기</button>
   </div>
 </div>
+<style>
+@keyframes spin { to { transform: rotate(360deg); } }
+</style>
 
 <!-- ════ SCRIPTS ════ -->
 <script>
@@ -522,6 +530,8 @@ const I18N = {
     'contact.h2':'거래 문의 및<br />견적 요청','contact.desc':'구매·판매·수출입 문의를 남겨주시면 빠르게 검토 후 연락드립니다.','contact.opLabel':'운영사','contact.domLabel':'도메인','contact.replyLabel':'응대','contact.replyVal':'문의 접수 후 24시간 내 회신',
     'form.nameLabel':'성함 / 회사명 *','form.namePh':'홍길동 / (주)ABC','form.emailLabel':'이메일 *','form.typeLabel':'문의 유형 *','form.typeDefault':'선택하세요','form.typeBuy':'구매 문의','form.typeSell':'판매 문의','form.typeNvidia':'NVIDIA GPU · 서버 문의','form.typeTrade':'수출입 무역 문의','form.typeOther':'기타','form.msgLabel':'내용 *','form.msgPh':'품목, 수량, 희망 조건 등을 자세히 적어주세요.','form.submit':'문의 전송','form.note':'* 표시 항목은 필수입니다.',
     'sent.msg':'문의가 전송되었습니다. 빠르게 연락드리겠습니다.',
+    'modal.translating':'번역 중...',
+    'modal.prefill.label':'[참고 매물]',
     'footer.desc':'전세계 반도체·GPU 도매 거래 플랫폼.\nKMC FOUNDATION 운영.','footer.s1':'NVIDIA GPU · 서버','footer.s2':'반도체 부품','footer.s3':'반도체 장비','footer.s4':'글로벌 무역 중개','footer.c1':'회사 소개','footer.c2':'매물 현황','footer.c3':'문의하기',
   },
   en: {
@@ -549,6 +559,8 @@ const I18N = {
     'contact.h2':'Trade Inquiries &amp;<br />Quote Requests','contact.desc':'Leave your buying, selling, or trade inquiry and we will review it promptly.','contact.opLabel':'Operator','contact.domLabel':'Website','contact.replyLabel':'Response','contact.replyVal':'Reply within 24 hours of inquiry',
     'form.nameLabel':'Name / Company *','form.namePh':'John Doe / ABC Corp.','form.emailLabel':'Email *','form.typeLabel':'Inquiry Type *','form.typeDefault':'Select one','form.typeBuy':'Purchase Inquiry','form.typeSell':'Sales Inquiry','form.typeNvidia':'NVIDIA GPU · Server Inquiry','form.typeTrade':'Import/Export Trade Inquiry','form.typeOther':'Other','form.msgLabel':'Message *','form.msgPh':'Please provide details such as product, quantity, and desired terms.','form.submit':'Send Inquiry','form.note':'* Required fields.',
     'sent.msg':'Your inquiry has been sent. We will get back to you shortly.',
+    'modal.translating':'Translating...',
+    'modal.prefill.label':'[Reference Listing]',
     'footer.desc':'Global Semiconductor &amp; GPU Wholesale Trading Platform.\nOperated by KMC FOUNDATION.','footer.s1':'NVIDIA GPU · Servers','footer.s2':'Semiconductor Components','footer.s3':'Semiconductor Equipment','footer.s4':'Global Trade Brokerage','footer.c1':'About','footer.c2':'Listings','footer.c3':'Contact',
   },
   zh: {
@@ -576,6 +588,8 @@ const I18N = {
     'contact.h2':'贸易询盘及<br />报价申请','contact.desc':'请留下您的采购、销售或贸易需求，我们将尽快审核并与您联系。','contact.opLabel':'运营方','contact.domLabel':'网站','contact.replyLabel':'响应时效','contact.replyVal':'收到询盘后24小时内回复',
     'form.nameLabel':'姓名 / 公司名称 *','form.namePh':'张三 / ABC公司','form.emailLabel':'邮箱 *','form.typeLabel':'询盘类型 *','form.typeDefault':'请选择','form.typeBuy':'采购询盘','form.typeSell':'销售询盘','form.typeNvidia':'NVIDIA GPU · 服务器询盘','form.typeTrade':'进出口贸易询盘','form.typeOther':'其他','form.msgLabel':'内容 *','form.msgPh':'请详细说明产品、数量及期望条件等信息。','form.submit':'发送询盘','form.note':'* 为必填项。',
     'sent.msg':'您的询盘已成功发送，我们将尽快与您联系。',
+    'modal.translating':'翻译中...',
+    'modal.prefill.label':'[参考项目]',
     'footer.desc':'全球半导体与GPU批发交易平台。\n由 KMC FOUNDATION 运营。','footer.s1':'NVIDIA GPU · 服务器','footer.s2':'半导体元器件','footer.s3':'半导体设备','footer.s4':'全球贸易中介','footer.c1':'公司简介','footer.c2':'在售清单','footer.c3':'联系我们',
   }
 };
@@ -751,23 +765,138 @@ async function renderListings(issues) {
   });
 }
 
-function openModal(issue, isSell, isBuy, dateStr, vc) {
+// ══════════════════════════════════
+// AI 번역 (Claude API — 모달 본문용)
+// ══════════════════════════════════
+const translateCache = {}; // { "issueNum_lang": "번역된 텍스트" }
+
+async function translateText(text, targetLang) {
+  if (!text || !text.trim()) return text;
+  if (targetLang === 'ko') return text; // 원문이 한국어이므로 그대로
+
+  const cacheKey = `${btoa(encodeURIComponent(text.substring(0,50)))}_${targetLang}`;
+  if (translateCache[cacheKey]) return translateCache[cacheKey];
+
+  const langName = targetLang === 'en' ? 'English' : 'Chinese (Simplified)';
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 1000,
+        messages: [{
+          role: 'user',
+          content: `Translate the following Korean text to ${langName}. Return ONLY the translated text, no explanations, no quotes, no markdown.\n\n${text}`
+        }]
+      })
+    });
+    if (!res.ok) return text;
+    const data = await res.json();
+    const translated = data.content?.[0]?.text?.trim() || text;
+    translateCache[cacheKey] = translated;
+    return translated;
+  } catch {
+    return text; // 실패 시 원문 표시
+  }
+}
+
+// ══════════════════════════════════
+// 모달 열기 (번역 포함)
+// ══════════════════════════════════
+let currentModalIssue = null; // 현재 열린 매물 정보 저장
+
+async function openModal(issue, isSell, isBuy, dateStr, vc) {
+  currentModalIssue = { issue, isSell, isBuy };
+
   const badgeLabel = isSell ? t('badge.sell') : isBuy ? t('badge.buy') : '';
   const badgeClass = isSell ? 'badge-sell' : 'badge-buy';
+
   document.getElementById('modalBadge').innerHTML = badgeLabel
     ? `<span class="listing-badge ${badgeClass}" style="margin-bottom:12px;">${badgeLabel}</span>` : '';
   document.getElementById('modalTitle').textContent = issue.title;
-  document.getElementById('modalBody').textContent  = issue.body || '';
   document.getElementById('modalDate').textContent  = t('modal.date') + dateStr;
   document.getElementById('modalViewCount').textContent = vc;
   document.getElementById('modalContactBtn').textContent = t('modal.contact');
   document.getElementById('listingModal').classList.add('open');
+
+  const bodyEl       = document.getElementById('modalBody');
+  const translatingEl = document.getElementById('modalTranslating');
+  const translatingTxt = document.getElementById('modalTranslatingText');
+  const originalBody  = issue.body || '';
+
+  if (currentLang === 'ko') {
+    // 한국어: 원문 그대로
+    translatingEl.style.display = 'none';
+    bodyEl.textContent = originalBody;
+  } else {
+    // 영어/중국어: 먼저 원문 표시 후 번역 로딩
+    bodyEl.textContent = originalBody;
+    translatingTxt.textContent = t('modal.translating');
+    translatingEl.style.display = 'flex';
+
+    const translated = await translateText(originalBody, currentLang);
+    translatingEl.style.display = 'none';
+    bodyEl.textContent = translated;
+  }
 }
+
+// ══════════════════════════════════
+// 문의 버튼 — 매물 내용 폼에 자동 채우기
+// ══════════════════════════════════
+document.getElementById('modalContactBtn').addEventListener('click', () => {
+  document.getElementById('listingModal').classList.remove('open');
+
+  if (!currentModalIssue) {
+    document.getElementById('contact').scrollIntoView({ behavior: 'smooth' });
+    return;
+  }
+
+  const { issue, isSell, isBuy } = currentModalIssue;
+  const typeSelect = document.getElementById('ftype');
+  const msgArea    = document.getElementById('fmsg');
+
+  // 문의 유형 자동 선택
+  if (isSell) typeSelect.value = 'buy';   // 판매 매물 → 구매 문의
+  else if (isBuy) typeSelect.value = 'sell'; // 구매 매물 → 판매 문의
+  else typeSelect.value = 'other';
+
+  // 매물 내용을 회색 placeholder 느낌으로 textarea에 미리 채우기
+  const prefillLabel = t('modal.prefill.label');
+  const prefillText  = `${prefillLabel}\n제목: ${issue.title}\n${issue.body || ''}\n\n`;
+  msgArea.value = prefillText;
+
+  // placeholder 스타일 적용 (회색 이탤릭)
+  msgArea.style.color = '#aaa';
+  msgArea.style.fontStyle = 'italic';
+
+  // 사용자가 클릭/입력 시 스타일 초기화 + 커서를 맨 끝(내용 다음 줄)으로
+  function resetStyle() {
+    msgArea.style.color = '';
+    msgArea.style.fontStyle = '';
+    msgArea.removeEventListener('click', resetStyle);
+    msgArea.removeEventListener('keydown', resetStyle);
+  }
+  msgArea.addEventListener('click', resetStyle);
+  msgArea.addEventListener('keydown', resetStyle);
+
+  // 스크롤 후 커서를 prefill 텍스트 맨 끝으로 이동
+  document.getElementById('contact').scrollIntoView({ behavior: 'smooth' });
+  setTimeout(() => {
+    msgArea.focus();
+    msgArea.setSelectionRange(prefillText.length, prefillText.length);
+  }, 600);
+});
 
 function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
-document.getElementById('modalClose').addEventListener('click', () => { document.getElementById('listingModal').classList.remove('open'); });
-document.getElementById('listingModal').addEventListener('click', e => { if(e.target===document.getElementById('listingModal')) document.getElementById('listingModal').classList.remove('open'); });
+document.getElementById('modalClose').addEventListener('click', () => {
+  document.getElementById('listingModal').classList.remove('open');
+});
+document.getElementById('listingModal').addEventListener('click', e => {
+  if (e.target === document.getElementById('listingModal'))
+    document.getElementById('listingModal').classList.remove('open');
+});
 
 // ── Sent banner ──
 if (new URLSearchParams(location.search).get('sent') === '1') {
