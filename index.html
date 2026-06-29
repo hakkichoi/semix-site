@@ -1022,7 +1022,7 @@ async function renderListings(issues) {
       return;
     }
     // ko이면 translateText가 원문 그대로 반환
-    const translated = await translateText(rawPreview, currentLang);
+    const translated = await translateText(rawPreview, currentLang, 'preview');
     previewEl.textContent = translated + suffix;
     previewEl.classList.remove('translating');
   });
@@ -1034,11 +1034,13 @@ async function renderListings(issues) {
 // ══════════════════════════════════
 const translateCache = {};
 
-async function translateText(text, targetLang) {
+// scope: 'preview' (카드 미리보기) | 'full' (모달 전체 본문)
+async function translateText(text, targetLang, scope) {
   if (!text || !text.trim()) return text;
   if (targetLang === 'ko') return text;
 
-  const cacheKey = `${targetLang}::${text.substring(0, 80)}`;
+  // scope를 캐시 키에 포함해 미리보기/전체 본문 분리
+  const cacheKey = `${targetLang}::${scope}::${text.substring(0, 120)}`;
   if (translateCache[cacheKey]) return translateCache[cacheKey];
 
   const gtLang = targetLang === 'zh' ? 'zh-CN' : 'en';
@@ -1047,7 +1049,6 @@ async function translateText(text, targetLang) {
     const res  = await fetch(url);
     if (!res.ok) return text;
     const data = await res.json();
-    // Google Translate 응답 구조: [[["번역문","원문",...], ...], ...]
     const translated = data[0]
       .filter(Boolean)
       .map(seg => seg[0] || '')
@@ -1094,7 +1095,7 @@ async function openModal(issue, isSell, isBuy, dateStr, vc) {
     translatingTxt.textContent = t('modal.translating');
     translatingEl.style.display = 'flex';
 
-    const translated = await translateText(originalBody, currentLang);
+    const translated = await translateText(originalBody, currentLang, 'full');
     translatingEl.style.display = 'none';
     bodyEl.textContent = translated;
   }
