@@ -247,31 +247,119 @@
   .service-card p { font-size: 14px; color: var(--ink-light); line-height: 1.6; }
   .card-tag { display: inline-block; margin-top: 16px; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; color: var(--blue); text-transform: uppercase; border: 1px solid var(--blue); padding: 3px 10px; border-radius: var(--radius); }
 
-  /* ── Listings ── */
+  /* ── Listings — 강조 + Compact 디자인 ── */
   #listings { scroll-margin-top: 80px; }
-  .listings-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
-  .listing-card {
-    background: var(--canvas); border: 1px solid var(--hairline);
-    border-radius: var(--radius); padding: 20px 20px 16px 24px;
-    position: relative; cursor: pointer; transition: border-color 0.2s;
+
+  /* 섹션 배경 — 다크로 변경해 강조 */
+  .listings-section-outer {
+    background: #0d1117;
+    padding: var(--section-gap) 32px;
+    position: relative;
   }
-  .listing-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--blue); border-radius: var(--radius) 0 0 var(--radius); }
-  .listing-card:hover { border-color: var(--blue); }
-  .listing-badge { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 2px 8px; border-radius: 2px; margin-bottom: 10px; display: inline-block; }
-  .badge-sell { background: #edf2fb; color: var(--blue); }
-  .badge-buy  { background: #f0faf0; color: #1a7a1a; }
-  .listing-card h3 { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
-  .listing-card p  { font-size: 14px; color: var(--ink-light); line-height: 1.6; }
-  .listing-card-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; }
-  .listing-date { font-size: 12px; color: #aaa; }
-  /* 조회수 */
+  .listings-section-outer::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--blue), #00a8ff, var(--blue));
+  }
+  .listings-section-outer .section-eyebrow { color: #00a8ff; }
+  .listings-section-outer .section-title   { color: #ffffff; }
+  .listings-section-outer .section-sub     { color: #888; }
+
+  /* 카드 그리드 — 더 좁은 간격 */
+  .listings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 12px;
+  }
+
+  /* 카드 — compact + 다크 테마 */
+  .listing-card {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 6px;
+    padding: 16px 16px 14px 20px;
+    position: relative;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s, transform 0.15s;
+  }
+  .listing-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    border-radius: 6px 0 0 6px;
+    background: var(--blue);
+  }
+  .listing-card.card-buy::before { background: #27ae60; }
+  .listing-card:hover {
+    border-color: var(--blue);
+    background: #1c2230;
+    transform: translateY(-2px);
+  }
+  .listing-card.card-buy:hover { border-color: #27ae60; }
+
+  /* 카드 상단 — 배지 + 날짜 한 줄 */
+  .listing-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .listing-badge {
+    font-size: 10px; font-weight: 700;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 2px 8px; border-radius: 2px;
+    display: inline-block;
+  }
+  .badge-sell { background: rgba(0,86,179,0.2); color: #4da3ff; border: 1px solid rgba(0,86,179,0.4); }
+  .badge-buy  { background: rgba(39,174,96,0.15); color: #5cdb95; border: 1px solid rgba(39,174,96,0.3); }
+  .listing-date { font-size: 11px; color: #555; }
+
+  /* 카드 제목 */
+  .listing-card h3 {
+    font-size: 14px; font-weight: 700;
+    color: #e6edf3; margin-bottom: 6px;
+    line-height: 1.4;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+
+  /* 카드 미리보기 텍스트 */
+  .listing-card-preview {
+    font-size: 12px; color: #666;
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    min-height: 36px;
+  }
+  .listing-card-preview.translating { color: #444; font-style: italic; }
+
+  /* 카드 하단 */
+  .listing-card-footer {
+    display: flex; align-items: center;
+    justify-content: flex-end;
+    margin-top: 10px;
+    padding-top: 8px;
+    border-top: 1px solid #21262d;
+  }
   .listing-views {
     display: flex; align-items: center; gap: 4px;
-    font-size: 12px; color: #aaa;
+    font-size: 11px; color: #555;
   }
-  .listing-views svg { width: 13px; height: 13px; fill: #aaa; }
-  .listing-empty { text-align: center; padding: 64px 32px; color: var(--ink-light); font-size: 15px; background: #f7f8fa; border: 1px solid var(--hairline); border-radius: var(--radius); }
-  .listings-loading { text-align: center; color: var(--ink-light); padding: 40px; }
+  .listing-views svg { width: 12px; height: 12px; fill: #555; }
+
+  /* 빈 상태 */
+  .listing-empty {
+    text-align: center; padding: 48px 32px;
+    color: #555; font-size: 14px;
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 6px;
+  }
+  .listings-loading { text-align: center; color: #555; padding: 40px; }
 
   /* Modal */
   .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 200; align-items: center; justify-content: center; padding: 24px; }
@@ -355,9 +443,11 @@
     .footer-inner { grid-template-columns: 1fr; gap: 28px; }
     .footer-bottom { flex-direction: column; gap: 8px; text-align: center; }
     .section-outer { padding: 48px 20px; }
+    .listings-section-outer { padding: 48px 20px; }
     .nvidia-outer  { padding: 48px 20px; }
     .nvidia-cards  { grid-template-columns: 1fr; }
     .nvidia-card.full { grid-column: span 1; }
+    .listings-grid { grid-template-columns: 1fr; }
   }
 </style>
 </head>
@@ -489,7 +579,7 @@
 </section>
 
 <!-- ════ LISTINGS ════ -->
-<section class="section-outer bg-light" id="listings">
+<section class="listings-section-outer" id="listings">
   <div class="section-inner">
     <div class="section-header">
       <div class="section-eyebrow" data-i18n="listings.eyebrow">Active Listings</div>
@@ -858,7 +948,6 @@ async function renderListings(issues) {
     return;
   }
 
-  // 먼저 카드 골격 그리기 (조회수는 — 로 표시 후 비동기 채움)
   const grid = document.createElement('div');
   grid.className = 'listings-grid';
 
@@ -870,16 +959,20 @@ async function renderListings(issues) {
     );
     const badgeLabel = isSell ? t('badge.sell') : isBuy ? t('badge.buy') : t('badge.reg');
     const badgeClass = isSell ? 'badge-sell' : isBuy ? 'badge-buy' : 'badge-sell';
+    const previewRaw = (issue.body || '').substring(0, 100);
 
     const card = document.createElement('div');
-    card.className = 'listing-card';
+    card.className = 'listing-card' + (isBuy ? ' card-buy' : '');
     card.id = `card-${issue.number}`;
     card.innerHTML = `
-      <span class="listing-badge ${badgeClass}">${badgeLabel}</span>
-      <h3>${escHtml(issue.title)}</h3>
-      <p>${escHtml((issue.body||'').substring(0,120))}${(issue.body||'').length>120?'…':''}</p>
-      <div class="listing-card-footer">
+      <div class="listing-card-top">
+        <span class="listing-badge ${badgeClass}">${badgeLabel}</span>
         <span class="listing-date">${dateStr}</span>
+      </div>
+      <h3 title="${escHtml(issue.title)}">${escHtml(issue.title)}</h3>
+      <div class="listing-card-preview${currentLang !== 'ko' ? ' translating' : ''}"
+           id="preview-${issue.number}">${escHtml(previewRaw)}${(issue.body||'').length>100?'…':''}</div>
+      <div class="listing-card-footer">
         <span class="listing-views">
           <svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zm0 12.5c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
           <span class="vc-num" id="vc-${issue.number}">—</span>
@@ -887,7 +980,7 @@ async function renderListings(issues) {
       </div>
     `;
 
-    // 카드 클릭 → 조회수 +1 (CountAPI hit) → 모달 열기
+    // 카드 클릭 → 조회수 +1 → 모달 열기
     card.addEventListener('click', async () => {
       const newVC = await incVC(issue.number);
       const vcEl = document.getElementById(`vc-${issue.number}`);
@@ -902,12 +995,26 @@ async function renderListings(issues) {
   container.innerHTML = '';
   container.appendChild(grid);
 
-  // 카드 렌더 후 조회수를 비동기로 채우기
+  // 조회수 비동기 로드
   issues.forEach(async issue => {
     const vc = await getVC(issue.number);
     const el = document.getElementById(`vc-${issue.number}`);
     if (el) el.textContent = vc;
   });
+
+  // 카드 미리보기 번역 (한국어 외)
+  if (currentLang !== 'ko') {
+    issues.forEach(async issue => {
+      const previewEl = document.getElementById(`preview-${issue.number}`);
+      if (!previewEl) return;
+      const rawPreview = (issue.body || '').substring(0, 100);
+      if (!rawPreview.trim()) return;
+      const translated = await translateText(rawPreview, currentLang);
+      const suffix = (issue.body||'').length > 100 ? '…' : '';
+      previewEl.textContent = translated + suffix;
+      previewEl.classList.remove('translating');
+    });
+  }
 }
 
 // ══════════════════════════════════
