@@ -531,11 +531,33 @@ document.getElementById('clearBtn').addEventListener('click', () => {
   document.getElementById('listingBody').value  = '';
 });
 
-// ── Load Listings ──
-const VC_PREFIX = 'semix_vc_';
-function getVC(n) { return parseInt(localStorage.getItem(VC_PREFIX + n) || '0', 10); }
-function setVC(n, v) { localStorage.setItem(VC_PREFIX + n, Math.max(0, parseInt(v)||0)); }
+// ── CountAPI helpers (전 기기 공유) ──
+const COUNT_BASE = 'https://countapi.mileshilliard.com/api/v1';
+function vcKey(n) { return `semix-site-issue-${n}`; }
 
+async function getVC(n) {
+  try {
+    const res = await fetch(`${COUNT_BASE}/get/${vcKey(n)}`);
+    if (!res.ok) return 0;
+    const data = await res.json();
+    return parseInt(data.value || 0, 10);
+  } catch { return 0; }
+}
+
+// 관리자 전용: 조회수를 특정 값으로 설정
+async function setVC(n, v) {
+  const val = Math.max(0, parseInt(v) || 0);
+  try {
+    const res = await fetch(`${COUNT_BASE}/set/${vcKey(n)}?value=${val}`);
+    if (!res.ok) throw new Error();
+    return val;
+  } catch {
+    showToast('조회수 설정 중 오류가 발생했습니다.', 'error');
+    return null;
+  }
+}
+
+// ── Load Listings ──
 async function loadListings() {
   const table = document.getElementById('listingsTable');
   const countEl = document.getElementById('listingCount');
@@ -557,12 +579,12 @@ async function loadListings() {
     if (countEl) countEl.textContent = `총 ${issues.length}건`;
     table.innerHTML = '';
 
+    // 카드 골격 먼저 렌더 (조회수는 — 로 표시 후 비동기 채움)
     issues.forEach(issue => {
       const isSell = issue.labels.some(l => l.name === 'sell');
       const isBuy  = issue.labels.some(l => l.name === 'buy');
       const date   = new Date(issue.created_at).toLocaleDateString('ko-KR');
       const bodyText = (issue.body || '').trim();
-      const vc = getVC(issue.number);
 
       const card = document.createElement('div');
       card.className = 'listing-item' + (isBuy ? ' listing-item-buy' : '');
@@ -585,22 +607,41 @@ async function loadListings() {
         }
         <div class="vc-row">
           <span class="vc-label">👁 조회수</span>
-          <span class="vc-count" id="vc-${issue.number}">${vc}</span>
+          <span class="vc-count" id="vc-admin-${issue.number}">—</span>
           <div class="vc-controls">
-            <input type="number" class="vc-input" id="vc-input-${issue.number}" value="${vc}" min="0" />
-            <button class="vc-set-btn" data-issue="${issue.number}">적용</button>
+            <input type="number" class="vc-input" id="vc-input-${issue.number}" value="0" min="0" placeholder="숫자 입력" />
+            <button class="vc-set-btn" data-issue="${issue.number}">설정</button>
           </div>
         </div>
       `;
 
       card.querySelector('.btn-delete').addEventListener('click', () => deleteListing(issue.number));
-      card.querySelector('.vc-set-btn').addEventListener('click', () => {
-        const val = parseInt(document.getElementById('vc-input-' + issue.number).value) || 0;
-        setVC(issue.number, val);
-        document.getElementById('vc-' + issue.number).textContent = val;
-        showToast(`조회수가 ${val}로 설정되었습니다.`, 'success');
+      card.querySelector('.vc-set-btn').addEventListener('click', async () => {
+        const btn = card.querySelector('.vc-set-btn');
+        const inputVal = parseInt(document.getElementById('vc-input-' + issue.number).value);
+        if (isNaN(inputVal) || inputVal < 0) { showToast('올바른 숫자를 입력하세요.', 'error'); return; }
+        btn.textContent = '설정 중...';
+        btn.disabled = true;
+        const result = await setVC(issue.number, inputVal);
+        if (result !== null) {
+          document.getElementById('vc-admin-' + issue.number).textContent = result;
+          document.getElementById('vc-input-' + issue.number).value = result;
+          showToast(`조회수가 ${result}로 설정되었습니다.`, 'success');
+        }
+        btn.textContent = '설정';
+        btn.disabled = false;
       });
+
       table.appendChild(card);
+    });
+
+    // 카드 렌더 후 실제 조회수를 비동기로 채우기
+    issues.forEach(async issue => {
+      const vc = await getVC(issue.number);
+      const el = document.getElementById('vc-admin-' + issue.number);
+      const inp = document.getElementById('vc-input-' + issue.number);
+      if (el)  el.textContent = vc;
+      if (inp) inp.value = vc;
     });
 
   } catch (e) {
