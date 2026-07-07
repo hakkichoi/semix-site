@@ -247,91 +247,159 @@
   .service-card p { font-size: 14px; color: var(--ink-light); line-height: 1.6; }
   .card-tag { display: inline-block; margin-top: 16px; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; color: var(--blue); text-transform: uppercase; border: 1px solid var(--blue); padding: 3px 10px; border-radius: var(--radius); }
 
-  /* ── Listings — 100vh, 사이트 스타일 통일 ── */
+  /* ══════════════════════════════════════
+     ACTIVE LISTINGS — Hero-level importance
+     Dark theme matching nav/footer, 100vh
+  ══════════════════════════════════════ */
   #listings { scroll-margin-top: 80px; }
 
   .listings-section-outer {
-    background: var(--canvas);
+    background: var(--canvas-dark);
     min-height: 100vh;
     padding: var(--section-gap) 32px;
     position: relative;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    border-top: 4px solid var(--blue);
+    overflow: hidden;
   }
-  /* 섹션 좌측 강조 바 대신 상단 굵은 파란 선으로 눈에 띄게 */
-  .listings-section-outer .section-eyebrow { color: var(--blue); }
-  .listings-section-outer .section-title   {
-    color: var(--ink);
-    font-size: 36px;
+  /* Subtle blue glow top border */
+  .listings-section-outer::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, var(--blue), #60b0ff, var(--blue), transparent);
   }
-  .listings-section-outer .section-sub { color: var(--ink-light); }
 
-  /* 카드 그리드 */
+  /* Section header row — eyebrow + live badge inline */
+  .listings-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .listings-header-left { flex: 1; }
+  .listings-eyebrow {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 12px; font-weight: 700;
+    letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--blue); margin-bottom: 12px;
+  }
+  /* Pulsing live dot */
+  .live-dot {
+    width: 8px; height: 8px;
+    background: #00e676;
+    border-radius: 50%;
+    flex-shrink: 0;
+    animation: pulse-dot 1.8s ease-in-out infinite;
+  }
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(0,230,118,0.5); }
+    50%       { opacity: 0.8; box-shadow: 0 0 0 5px rgba(0,230,118,0); }
+  }
+  .listings-header-title {
+    font-size: 36px; font-weight: 700;
+    color: var(--on-dark); line-height: 1.2;
+    margin: 0 0 8px;
+  }
+  .listings-header-title span { color: var(--blue); }
+  .listings-header-sub {
+    font-size: 14px; color: #666; margin: 0;
+    max-width: 500px; line-height: 1.6;
+  }
+  /* Item count badge */
+  .listings-count-badge {
+    display: flex; align-items: center; gap: 8px;
+    background: rgba(0,86,179,0.15);
+    border: 1px solid rgba(0,86,179,0.3);
+    border-radius: 4px;
+    padding: 10px 18px;
+    flex-shrink: 0;
+  }
+  .listings-count-badge .count-num {
+    font-size: 28px; font-weight: 700; color: var(--on-dark); line-height: 1;
+  }
+  .listings-count-badge .count-label {
+    font-size: 11px; color: #666; font-weight: 600;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    line-height: 1.3;
+  }
+
+  /* Card grid */
   .listings-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 16px;
   }
 
-  /* 카드 — 사이트 스타일과 통일, 강조 포인트 추가 */
+  /* Card */
   .listing-card {
-    background: var(--canvas);
-    border: 1px solid var(--hairline);
-    border-radius: var(--radius);
-    padding: 20px 20px 16px 24px;
+    background: #161b22;
+    border: 1px solid #21262d;
+    border-radius: 6px;
+    padding: 20px 20px 16px 22px;
     position: relative;
     cursor: pointer;
-    transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
+    transition: border-color 0.2s, background 0.2s, transform 0.15s, box-shadow 0.2s;
   }
   .listing-card::before {
     content: '';
     position: absolute;
     left: 0; top: 0; bottom: 0;
-    width: 4px;
-    border-radius: var(--radius) 0 0 var(--radius);
+    width: 3px;
+    border-radius: 6px 0 0 6px;
     background: var(--blue);
   }
-  .listing-card.card-buy::before { background: #1a7a1a; }
+  .listing-card.card-buy::before { background: #27ae60; }
   .listing-card:hover {
     border-color: var(--blue);
-    box-shadow: 0 4px 16px rgba(0,86,179,0.10);
-    transform: translateY(-2px);
+    background: #1c2333;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(0,86,179,0.2);
   }
   .listing-card.card-buy:hover {
-    border-color: #1a7a1a;
-    box-shadow: 0 4px 16px rgba(26,122,26,0.10);
+    border-color: #27ae60;
+    box-shadow: 0 8px 24px rgba(39,174,96,0.15);
   }
 
-  /* 카드 상단 — 배지 + 날짜 한 줄 */
+  /* Card top row */
   .listing-card-top {
-    display: flex;
-    align-items: center;
+    display: flex; align-items: center;
     justify-content: space-between;
     margin-bottom: 10px;
   }
   .listing-badge {
-    font-size: 11px; font-weight: 700;
-    letter-spacing: 0.08em; text-transform: uppercase;
-    padding: 3px 10px; border-radius: 2px;
+    font-size: 10px; font-weight: 700;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 3px 10px; border-radius: 3px;
     display: inline-block;
   }
-  .badge-sell { background: #edf2fb; color: var(--blue); }
-  .badge-buy  { background: #f0faf0; color: #1a7a1a; }
-  .listing-date { font-size: 12px; color: #aaa; }
+  .badge-sell {
+    background: rgba(0,86,179,0.2);
+    color: #60b0ff;
+    border: 1px solid rgba(0,86,179,0.35);
+  }
+  .badge-buy {
+    background: rgba(39,174,96,0.15);
+    color: #5cdb95;
+    border: 1px solid rgba(39,174,96,0.3);
+  }
+  .listing-date { font-size: 11px; color: #444; }
 
-  /* 카드 제목 */
+  /* Card title */
   .listing-card h3 {
-    font-size: 16px; font-weight: 700;
-    color: var(--ink); margin-bottom: 8px;
+    font-size: 15px; font-weight: 700;
+    color: #cdd9e5; margin-bottom: 8px;
     line-height: 1.4;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
 
-  /* 카드 미리보기 */
+  /* Card preview */
   .listing-card-preview {
-    font-size: 13px; color: var(--ink-light);
+    font-size: 13px; color: #555;
     line-height: 1.6;
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -339,34 +407,31 @@
     overflow: hidden;
     min-height: 42px;
   }
-  .listing-card-preview.translating {
-    color: #bbb;
-    font-style: italic;
-  }
+  .listing-card-preview.translating { color: #333; font-style: italic; }
 
-  /* 카드 하단 */
+  /* Card footer */
   .listing-card-footer {
     display: flex; align-items: center;
     justify-content: space-between;
-    margin-top: 12px;
-    padding-top: 10px;
-    border-top: 1px solid var(--hairline);
+    margin-top: 12px; padding-top: 10px;
+    border-top: 1px solid #21262d;
   }
   .listing-views {
     display: flex; align-items: center; gap: 4px;
-    font-size: 12px; color: #aaa;
+    font-size: 11px; color: #444;
+    margin-left: auto;
   }
-  .listing-views svg { width: 13px; height: 13px; fill: #aaa; }
+  .listing-views svg { width: 12px; height: 12px; fill: #444; }
 
-  /* 빈 상태 / 로딩 */
+  /* Empty / loading */
   .listing-empty {
     text-align: center; padding: 64px 32px;
-    color: var(--ink-light); font-size: 15px;
-    background: #f7f8fa;
-    border: 1px solid var(--hairline);
-    border-radius: var(--radius);
+    color: #555; font-size: 14px;
+    background: #161b22;
+    border: 1px solid #21262d;
+    border-radius: 6px;
   }
-  .listings-loading { text-align: center; color: var(--ink-light); padding: 40px; }
+  .listings-loading { text-align: center; color: #555; padding: 40px; }
 
   /* Modal */
   .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 200; align-items: center; justify-content: center; padding: 24px; }
@@ -443,15 +508,33 @@
     .nav-links { display: none; }
     .nav-right .nav-lang { display: none; }
     .hamburger { display: flex; }
-    .hero { grid-template-columns: 1fr; padding: 48px 24px 32px; gap: 40px; }
+    .hero {
+      grid-template-columns: 1fr;
+      padding: 48px 24px 32px;
+      gap: 40px;
+      text-align: center;
+    }
+    .hero-eyebrow { display: block; }
+    .hero-actions {
+      justify-content: center;
+      flex-direction: row;
+      flex-wrap: wrap;
+    }
     .hero-stats { grid-template-columns: 1fr 1fr; }
-    .hero-bottom { padding: 0 24px 40px; }
+    .hero-bottom {
+      padding: 0 24px 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .hero-lang-strip { justify-content: center; }
     .contact-grid { grid-template-columns: 1fr; }
     .footer-inner { grid-template-columns: 1fr; gap: 28px; }
     .footer-bottom { flex-direction: column; gap: 8px; text-align: center; }
     .section-outer { padding: 48px 20px; }
     .listings-section-outer { padding: 48px 20px; min-height: auto; }
-    .listings-section-outer .section-title { font-size: 28px; }
+    .listings-section-outer .listings-header-title { font-size: 26px; }
+    .listings-header { flex-direction: column; gap: 16px; align-items: flex-start; }
     .nvidia-outer  { padding: 48px 20px; }
     .nvidia-cards  { grid-template-columns: 1fr; }
     .nvidia-card.full { grid-column: span 1; }
@@ -589,10 +672,21 @@
 <!-- ════ LISTINGS ════ -->
 <section class="listings-section-outer" id="listings">
   <div class="section-inner">
-    <div class="section-header">
-      <div class="section-eyebrow" data-i18n="listings.eyebrow">Active Listings</div>
-      <h2 class="section-title" data-i18n="listings.title">현재 매물 현황</h2>
-      <p class="section-sub" data-i18n="listings.sub">현재 구매 또는 판매 진행 중인 품목입니다. 관심 있는 항목은 문의하기를 이용해 주세요.</p>
+    <div class="listings-header">
+      <div class="listings-header-left">
+        <div class="listings-eyebrow">
+          <span class="live-dot"></span>
+          <span data-i18n="listings.eyebrow">Active Listings</span>
+        </div>
+        <h2 class="listings-header-title" data-i18n-html="listings.title">현재 <span>매물 현황</span></h2>
+        <p class="listings-header-sub" data-i18n="listings.sub">현재 구매 또는 판매 진행 중인 품목입니다. 관심 있는 항목은 문의하기를 이용해 주세요.</p>
+      </div>
+      <div class="listings-count-badge" id="listingsCountBadge" style="display:none;">
+        <div>
+          <div class="count-num" id="listingsCountNum">0</div>
+          <div class="count-label" data-i18n="listings.countLabel">건 등록 중</div>
+        </div>
+      </div>
     </div>
     <div id="listingsContainer" class="listings-loading"><p data-i18n="listings.loading">매물 정보를 불러오는 중...</p></div>
   </div>
@@ -735,7 +829,7 @@ const I18N = {
     'nvidia.h2':'NVIDIA 제품군<br />대량 중개 거래','nvidia.desc':'AI 인프라 수요 급증에 따라 NVIDIA H100·A100 GPU 및 DGX AI 서버의 중개 판매를 전문적으로 취급합니다. 글로벌 공급망을 통해 빠른 조달과 안정적인 거래를 보장합니다.',
     'nvidia.item1':'NVIDIA H100 / H200 / A100 / A800 GPU','nvidia.item2':'DGX H100 / DGX A100 AI 서버','nvidia.item3':'HGX 서버 보드 및 NVLink 스위치','nvidia.item4':'RTX 6000 / RTX A 시리즈 전문가용 GPU',
     'nvidia.card1.label':'GPU 라인업','nvidia.card2.label':'서버 솔루션','nvidia.card3.label':'거래 방식','nvidia.card3.value':'신품 · 중고 · 임대 중개','nvidia.card3.note':'수량·사양·납기에 맞는 최적 조건을 제안합니다.',
-    'listings.eyebrow':'Active Listings','listings.title':'현재 매물 현황','listings.sub':'현재 구매 또는 판매 진행 중인 품목입니다. 관심 있는 항목은 문의하기를 이용해 주세요.','listings.loading':'매물 정보를 불러오는 중...',
+    'listings.eyebrow':'Active Listings','listings.title':'현재 <span>매물 현황</span>','listings.sub':'현재 구매 또는 판매 진행 중인 품목입니다. 관심 있는 항목은 문의하기를 이용해 주세요.','listings.loading':'매물 정보를 불러오는 중...','listings.countLabel':'건 등록 중',
     'listings.empty':'현재 등록된 매물이 없습니다.\n문의하기를 통해 구매·판매 의사를 전달해 주세요.','listings.error':'매물 정보를 불러오지 못했습니다.\n잠시 후 다시 시도해 주세요.',
     'badge.sell':'판매','badge.buy':'구매','badge.reg':'등록','modal.date':'등록일: ','modal.contact':'이 매물 문의하기','views.label':'조회',
     'about.h2':'글로벌 반도체 도매 거래의<br />신뢰할 수 있는 파트너',
@@ -764,7 +858,7 @@ const I18N = {
     'nvidia.h2':'NVIDIA Product Line<br />Bulk Brokerage Trading','nvidia.desc':'With surging demand for AI infrastructure, we specialize in brokering NVIDIA H100 and A100 GPUs alongside DGX AI servers.',
     'nvidia.item1':'NVIDIA H100 / H200 / A100 / A800 GPUs','nvidia.item2':'DGX H100 / DGX A100 AI Servers','nvidia.item3':'HGX Server Boards &amp; NVLink Switches','nvidia.item4':'RTX 6000 / RTX A Series Professional GPUs',
     'nvidia.card1.label':'GPU Lineup','nvidia.card2.label':'Server Solutions','nvidia.card3.label':'Transaction Type','nvidia.card3.value':'New · Used · Lease Brokerage','nvidia.card3.note':'We propose the best terms tailored to your quantity, specifications, and delivery schedule.',
-    'listings.eyebrow':'Active Listings','listings.title':'Current Listings','listings.sub':'Items currently available for purchase or sale. Please use the inquiry form for items of interest.','listings.loading':'Loading listings...',
+    'listings.eyebrow':'Active Listings','listings.title':'Current <span>Listings</span>','listings.sub':'Items currently available for purchase or sale. Please use the inquiry form for items of interest.','listings.loading':'Loading listings...','listings.countLabel':'items listed',
     'listings.empty':'No listings are currently registered.\nPlease contact us to express your interest.','listings.error':'Failed to load listings.\nPlease try again later.',
     'badge.sell':'SELL','badge.buy':'BUY','badge.reg':'LISTED','modal.date':'Listed: ','modal.contact':'Inquire About This Item','views.label':'views',
     'about.h2':'A Trusted Partner for<br />Global Semiconductor Wholesale',
@@ -793,7 +887,7 @@ const I18N = {
     'nvidia.h2':'NVIDIA 产品系列<br />大宗中介交易','nvidia.desc':'随着AI基础设施需求的急剧增长，我们专注于 NVIDIA H100、A100 GPU 及 DGX AI 服务器的中介销售。',
     'nvidia.item1':'NVIDIA H100 / H200 / A100 / A800 GPU','nvidia.item2':'DGX H100 / DGX A100 AI 服务器','nvidia.item3':'HGX 服务器板卡及 NVLink 交换机','nvidia.item4':'RTX 6000 / RTX A 系列专业级 GPU',
     'nvidia.card1.label':'GPU 产品线','nvidia.card2.label':'服务器解决方案','nvidia.card3.label':'交易方式','nvidia.card3.value':'新品 · 二手 · 租赁中介','nvidia.card3.note':'我们将根据您的数量、规格及交货周期提供最优方案。',
-    'listings.eyebrow':'在售清单','listings.title':'当前在售项目','listings.sub':'以下为当前正在采购或销售的项目，如有意向请通过联系表单与我们洽谈。','listings.loading':'正在加载清单...',
+    'listings.eyebrow':'在售清单','listings.title':'当前<span>在售项目</span>','listings.sub':'以下为当前正在采购或销售的项目，如有意向请通过联系表单与我们洽谈。','listings.loading':'正在加载清单...','listings.countLabel':'项在售',
     'listings.empty':'当前暂无在售项目。\n如有采购或销售意向，请通过联系表单与我们联系。','listings.error':'加载清单失败，请稍后重试。',
     'badge.sell':'出售','badge.buy':'求购','badge.reg':'已登记','modal.date':'登记日期：','modal.contact':'询问此项目','views.label':'浏览',
     'about.h2':'全球半导体批发交易的<br />可靠合作伙伴',
@@ -941,6 +1035,13 @@ async function loadListings() {
     if (!res.ok) throw new Error();
     const issues = await res.json();
     cachedIssues = Array.isArray(issues) ? issues : [];
+    // Show count badge
+    if (cachedIssues.length > 0) {
+      const badge = document.getElementById('listingsCountBadge');
+      const num   = document.getElementById('listingsCountNum');
+      if (badge) badge.style.display = 'flex';
+      if (num)   num.textContent = cachedIssues.length;
+    }
     renderListings(cachedIssues);
   } catch (e) {
     container.className = '';
