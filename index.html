@@ -267,16 +267,12 @@
   #listings { scroll-margin-top: 80px; }
 
   .listings-section-outer {
-    background: var(--canvas-dark);
-    min-height: 100vh;
-    padding: var(--section-gap) 32px;
+    background: linear-gradient(180deg, #eef3fb 0%, #f7f9fc 100%);
+    padding: 88px 32px;
     position: relative;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
     overflow: hidden;
   }
-  /* Subtle blue glow top border */
+  /* Blue accent line on top */
   .listings-section-outer::before {
     content: '';
     position: absolute;
@@ -285,12 +281,12 @@
     background: linear-gradient(90deg, transparent, var(--blue), #60b0ff, var(--blue), transparent);
   }
 
-  /* Section header row — eyebrow + live badge inline */
+  /* Section header */
   .listings-header {
     display: flex;
     align-items: flex-end;
     justify-content: space-between;
-    margin-bottom: 40px;
+    margin-bottom: 36px;
     flex-wrap: wrap;
     gap: 16px;
   }
@@ -301,150 +297,141 @@
     letter-spacing: 0.2em; text-transform: uppercase;
     color: var(--blue); margin-bottom: 12px;
   }
-  /* Pulsing live dot */
   .live-dot {
     width: 8px; height: 8px;
-    background: #00e676;
+    background: #16a34a;
     border-radius: 50%;
     flex-shrink: 0;
     animation: pulse-dot 1.8s ease-in-out infinite;
   }
   @keyframes pulse-dot {
-    0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(0,230,118,0.5); }
-    50%       { opacity: 0.8; box-shadow: 0 0 0 5px rgba(0,230,118,0); }
+    0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(22,163,74,0.45); }
+    50%       { opacity: 0.85; box-shadow: 0 0 0 5px rgba(22,163,74,0); }
   }
   .listings-header-title {
     font-size: 36px; font-weight: 700;
-    color: var(--on-dark); line-height: 1.2;
-    margin: 0 0 8px;
+    color: #0f172a; line-height: 1.2;
+    margin: 0 0 10px;
   }
   .listings-header-title span { color: var(--blue); }
   .listings-header-sub {
-    font-size: 14px; color: #666; margin: 0;
-    max-width: 500px; line-height: 1.6;
+    font-size: 15px; color: #475569; margin: 0;
+    max-width: 560px; line-height: 1.6;
   }
-  /* Item count badge */
+  /* Count badge */
   .listings-count-badge {
     display: flex; align-items: center; gap: 8px;
-    background: rgba(0,86,179,0.15);
-    border: 1px solid rgba(0,86,179,0.3);
-    border-radius: 4px;
-    padding: 10px 18px;
+    background: #ffffff;
+    border: 1px solid #d6e2f3;
+    border-radius: 10px;
+    padding: 12px 20px;
     flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(15,23,42,0.06);
   }
   .listings-count-badge .count-num {
-    font-size: 28px; font-weight: 700; color: var(--on-dark); line-height: 1;
+    font-size: 30px; font-weight: 700; color: var(--blue); line-height: 1;
   }
   .listings-count-badge .count-label {
-    font-size: 11px; color: #666; font-weight: 600;
-    letter-spacing: 0.06em; text-transform: uppercase;
-    line-height: 1.3;
+    font-size: 12px; color: #475569; font-weight: 600;
+    letter-spacing: 0.04em; line-height: 1.3; margin-top: 4px;
   }
 
   /* Card grid */
   .listings-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 16px;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 20px;
   }
 
   /* Card */
   .listing-card {
-    background: #161b22;
-    border: 1px solid #21262d;
-    border-radius: 6px;
-    padding: 20px 20px 16px 22px;
-    position: relative;
+    background: #ffffff;
+    border: 1px solid #dde5f0;
+    border-top: 4px solid var(--blue);
+    border-radius: 12px;
+    padding: 22px 24px 18px;
     cursor: pointer;
-    transition: border-color 0.2s, background 0.2s, transform 0.15s, box-shadow 0.2s;
+    display: flex; flex-direction: column;
+    box-shadow: 0 2px 10px rgba(15,23,42,0.06);
+    transition: transform 0.15s, box-shadow 0.2s, border-color 0.2s;
   }
-  .listing-card::before {
-    content: '';
-    position: absolute;
-    left: 0; top: 0; bottom: 0;
-    width: 3px;
-    border-radius: 6px 0 0 6px;
-    background: var(--blue);
-  }
-  .listing-card.card-buy::before { background: #27ae60; }
+  .listing-card.card-buy { border-top-color: #16a34a; }
   .listing-card:hover {
-    border-color: var(--blue);
-    background: #1c2333;
-    transform: translateY(-3px);
-    box-shadow: 0 8px 24px rgba(0,86,179,0.2);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 28px rgba(0,86,179,0.14);
+    border-color: #b9cdea;
+    border-top-color: var(--blue);
   }
   .listing-card.card-buy:hover {
-    border-color: #27ae60;
-    box-shadow: 0 8px 24px rgba(39,174,96,0.15);
+    box-shadow: 0 12px 28px rgba(22,163,74,0.14);
+    border-color: #bfe3cc;
+    border-top-color: #16a34a;
   }
 
-  /* Card top row */
   .listing-card-top {
     display: flex; align-items: center;
     justify-content: space-between;
-    margin-bottom: 10px;
+    margin-bottom: 14px;
   }
   .listing-badge {
-    font-size: 10px; font-weight: 700;
-    letter-spacing: 0.1em; text-transform: uppercase;
-    padding: 3px 10px; border-radius: 3px;
+    font-size: 12px; font-weight: 700;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    padding: 4px 12px; border-radius: 20px;
     display: inline-block;
   }
-  .badge-sell {
-    background: rgba(0,86,179,0.2);
-    color: #60b0ff;
-    border: 1px solid rgba(0,86,179,0.35);
-  }
-  .badge-buy {
-    background: rgba(39,174,96,0.15);
-    color: #5cdb95;
-    border: 1px solid rgba(39,174,96,0.3);
-  }
-  .listing-date { font-size: 11px; color: #444; }
+  .badge-sell { background: #e7f0fc; color: #0056b3; }
+  .badge-buy  { background: #e6f6ec; color: #15803d; }
+  .listing-date { font-size: 13px; color: #64748b; }
 
-  /* Card title */
   .listing-card h3 {
-    font-size: 15px; font-weight: 700;
-    color: #cdd9e5; margin-bottom: 8px;
+    font-size: 18px; font-weight: 700;
+    color: #0f172a; margin-bottom: 12px;
     line-height: 1.4;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    word-break: break-word;
   }
 
-  /* Card preview */
+  .listing-card-body {
+    background: #f6f8fb;
+    border: 1px solid #edf1f6;
+    border-radius: 8px;
+    padding: 12px 14px;
+    flex: 1;
+  }
   .listing-card-preview {
-    font-size: 13px; color: #555;
-    line-height: 1.6;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
+    font-size: 14px; color: #334155;
+    line-height: 1.7;
+    white-space: pre-line;
+    word-break: break-word;
+    max-height: calc(1.7em * 5);
     overflow: hidden;
-    min-height: 42px;
   }
-  .listing-card-preview.translating { color: #333; font-style: italic; }
+  .listing-card-preview.translating { color: #94a3b8; font-style: italic; }
 
-  /* Card footer */
   .listing-card-footer {
     display: flex; align-items: center;
     justify-content: space-between;
-    margin-top: 12px; padding-top: 10px;
-    border-top: 1px solid #21262d;
+    margin-top: 16px; padding-top: 14px;
+    border-top: 1px solid #edf1f6;
   }
+  .listing-more {
+    font-size: 13px; font-weight: 700; color: var(--blue);
+  }
+  .listing-card.card-buy .listing-more { color: #15803d; }
+  .listing-card:hover .listing-more { text-decoration: underline; }
   .listing-views {
-    display: flex; align-items: center; gap: 4px;
-    font-size: 11px; color: #444;
-    margin-left: auto;
+    display: flex; align-items: center; gap: 5px;
+    font-size: 13px; color: #64748b;
   }
-  .listing-views svg { width: 12px; height: 12px; fill: #444; }
+  .listing-views svg { width: 15px; height: 15px; fill: #94a3b8; }
 
-  /* Empty / loading */
   .listing-empty {
     text-align: center; padding: 64px 32px;
-    color: #555; font-size: 14px;
-    background: #161b22;
-    border: 1px solid #21262d;
-    border-radius: 6px;
+    color: #475569; font-size: 15px;
+    background: #ffffff;
+    border: 1px dashed #cbd5e1;
+    border-radius: 12px;
   }
-  .listings-loading { text-align: center; color: #555; padding: 40px; }
+  .listings-loading { text-align: center; color: #64748b; padding: 40px; }
 
   /* Modal */
   .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 200; align-items: center; justify-content: center; padding: 24px; }
@@ -842,7 +829,7 @@ const I18N = {
     'nvidia.h2':'NVIDIA 제품군<br />대량 중개 거래','nvidia.desc':'AI 인프라 수요 급증에 따라 NVIDIA H100·A100 GPU 및 DGX AI 서버의 중개 판매를 전문적으로 취급합니다. 글로벌 공급망을 통해 빠른 조달과 안정적인 거래를 보장합니다.',
     'nvidia.item1':'NVIDIA H100 / H200 / A100 / A800 GPU','nvidia.item2':'DGX H100 / DGX A100 AI 서버','nvidia.item3':'HGX 서버 보드 및 NVLink 스위치','nvidia.item4':'RTX 6000 / RTX A 시리즈 전문가용 GPU',
     'nvidia.card1.label':'GPU 라인업','nvidia.card2.label':'서버 솔루션','nvidia.card3.label':'거래 방식','nvidia.card3.value':'신품 · 중고 · 임대 중개','nvidia.card3.note':'수량·사양·납기에 맞는 최적 조건을 제안합니다.',
-    'listings.eyebrow':'Active Listings','listings.title':'현재 <span>매물 현황</span>','listings.sub':'현재 구매 또는 판매 진행 중인 품목입니다. 관심 있는 항목은 문의하기를 이용해 주세요.','listings.loading':'매물 정보를 불러오는 중...','listings.countLabel':'건 등록 중',
+    'listings.eyebrow':'Active Listings','listings.title':'현재 <span>매물 현황</span>','listings.sub':'현재 구매 또는 판매 진행 중인 품목입니다. 관심 있는 항목은 문의하기를 이용해 주세요.','listings.loading':'매물 정보를 불러오는 중...','listings.countLabel':'건 등록 중','listings.more':'자세히 보기 →',
     'listings.empty':'현재 등록된 매물이 없습니다.\n문의하기를 통해 구매·판매 의사를 전달해 주세요.','listings.error':'매물 정보를 불러오지 못했습니다.\n잠시 후 다시 시도해 주세요.',
     'badge.sell':'판매','badge.buy':'구매','badge.reg':'등록','modal.date':'등록일: ','modal.contact':'이 매물 문의하기','views.label':'조회',
     'about.h2':'글로벌 반도체 도매 거래의<br />신뢰할 수 있는 파트너',
@@ -871,7 +858,7 @@ const I18N = {
     'nvidia.h2':'NVIDIA Product Line<br />Bulk Brokerage Trading','nvidia.desc':'With surging demand for AI infrastructure, we specialize in brokering NVIDIA H100 and A100 GPUs alongside DGX AI servers.',
     'nvidia.item1':'NVIDIA H100 / H200 / A100 / A800 GPUs','nvidia.item2':'DGX H100 / DGX A100 AI Servers','nvidia.item3':'HGX Server Boards &amp; NVLink Switches','nvidia.item4':'RTX 6000 / RTX A Series Professional GPUs',
     'nvidia.card1.label':'GPU Lineup','nvidia.card2.label':'Server Solutions','nvidia.card3.label':'Transaction Type','nvidia.card3.value':'New · Used · Lease Brokerage','nvidia.card3.note':'We propose the best terms tailored to your quantity, specifications, and delivery schedule.',
-    'listings.eyebrow':'Active Listings','listings.title':'Current <span>Listings</span>','listings.sub':'Items currently available for purchase or sale. Please use the inquiry form for items of interest.','listings.loading':'Loading listings...','listings.countLabel':'items listed',
+    'listings.eyebrow':'Active Listings','listings.title':'Current <span>Listings</span>','listings.sub':'Items currently available for purchase or sale. Please use the inquiry form for items of interest.','listings.loading':'Loading listings...','listings.countLabel':'items listed','listings.more':'View details →',
     'listings.empty':'No listings are currently registered.\nPlease contact us to express your interest.','listings.error':'Failed to load listings.\nPlease try again later.',
     'badge.sell':'SELL','badge.buy':'BUY','badge.reg':'LISTED','modal.date':'Listed: ','modal.contact':'Inquire About This Item','views.label':'views',
     'about.h2':'A Trusted Partner for<br />Global Semiconductor Wholesale',
@@ -900,7 +887,7 @@ const I18N = {
     'nvidia.h2':'NVIDIA 产品系列<br />大宗中介交易','nvidia.desc':'随着AI基础设施需求的急剧增长，我们专注于 NVIDIA H100、A100 GPU 及 DGX AI 服务器的中介销售。',
     'nvidia.item1':'NVIDIA H100 / H200 / A100 / A800 GPU','nvidia.item2':'DGX H100 / DGX A100 AI 服务器','nvidia.item3':'HGX 服务器板卡及 NVLink 交换机','nvidia.item4':'RTX 6000 / RTX A 系列专业级 GPU',
     'nvidia.card1.label':'GPU 产品线','nvidia.card2.label':'服务器解决方案','nvidia.card3.label':'交易方式','nvidia.card3.value':'新品 · 二手 · 租赁中介','nvidia.card3.note':'我们将根据您的数量、规格及交货周期提供最优方案。',
-    'listings.eyebrow':'在售清单','listings.title':'当前<span>在售项目</span>','listings.sub':'以下为当前正在采购或销售的项目，如有意向请通过联系表单与我们洽谈。','listings.loading':'正在加载清单...','listings.countLabel':'项在售',
+    'listings.eyebrow':'在售清单','listings.title':'当前<span>在售项目</span>','listings.sub':'以下为当前正在采购或销售的项目，如有意向请通过联系表单与我们洽谈。','listings.loading':'正在加载清单...','listings.countLabel':'项在售','listings.more':'查看详情 →',
     'listings.empty':'当前暂无在售项目。\n如有采购或销售意向，请通过联系表单与我们联系。','listings.error':'加载清单失败，请稍后重试。',
     'badge.sell':'出售','badge.buy':'求购','badge.reg':'已登记','modal.date':'登记日期：','modal.contact':'询问此项目','views.label':'浏览',
     'about.h2':'全球半导体批发交易的<br />可靠合作伙伴',
@@ -1081,8 +1068,8 @@ async function renderListings(issues) {
     );
     const badgeLabel = isSell ? t('badge.sell') : isBuy ? t('badge.buy') : t('badge.reg');
     const badgeClass = isSell ? 'badge-sell' : isBuy ? 'badge-buy' : 'badge-sell';
-    const previewRaw = (issue.body || '').substring(0, 120);
-    const suffix     = (issue.body || '').length > 120 ? '…' : '';
+    const previewRaw = (issue.body || '').substring(0, 220);
+    const suffix     = (issue.body || '').length > 220 ? '…' : '';
 
     const card = document.createElement('div');
     card.className = 'listing-card' + (isBuy ? ' card-buy' : '');
@@ -1093,10 +1080,10 @@ async function renderListings(issues) {
         <span class="listing-date">${dateStr}</span>
       </div>
       <h3 title="${escHtml(issue.title)}">${escHtml(issue.title)}</h3>
-      <div class="listing-card-preview translating"
-           id="preview-${issue.number}">${escHtml(previewRaw)}${suffix}</div>
+      <div class="listing-card-body"><div class="listing-card-preview translating"
+           id="preview-${issue.number}">${escHtml(previewRaw)}${suffix}</div></div>
       <div class="listing-card-footer">
-        <span></span>
+        <span class="listing-more">${t('listings.more')}</span>
         <span class="listing-views">
           <svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zm0 12.5c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
           <span class="vc-num" id="vc-${issue.number}">—</span>
@@ -1129,8 +1116,8 @@ async function renderListings(issues) {
   issues.forEach(async issue => {
     const previewEl = document.getElementById(`preview-${issue.number}`);
     if (!previewEl) return;
-    const rawPreview = (issue.body || '').substring(0, 120);
-    const suffix     = (issue.body || '').length > 120 ? '…' : '';
+    const rawPreview = (issue.body || '').substring(0, 220);
+    const suffix     = (issue.body || '').length > 220 ? '…' : '';
     if (!rawPreview.trim()) {
       previewEl.classList.remove('translating');
       return;
@@ -1154,7 +1141,7 @@ async function translateText(text, targetLang, scope) {
   if (targetLang === 'ko') return text;
 
   // scope를 캐시 키에 포함해 미리보기/전체 본문 분리
-  const cacheKey = `${targetLang}::${scope}::${text.substring(0, 120)}`;
+  const cacheKey = `${targetLang}::${scope}::${text}`;
   if (translateCache[cacheKey]) return translateCache[cacheKey];
 
   const gtLang = targetLang === 'zh' ? 'zh-CN' : 'en';

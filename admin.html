@@ -283,7 +283,7 @@
   .toggle-body:hover { text-decoration: underline; }
 
   .btn-delete {
-    background: none;
+    background: none; font-family: inherit;
     border: 1px solid #e0e0e0;
     color: #bbb; cursor: pointer;
     font-size: 13px; font-weight: 700;
@@ -292,6 +292,27 @@
     transition: all 0.15s;
     white-space: nowrap;
   }
+  .btn-edit {
+    background: #edf2fb;
+    border: 1px solid #c9d8f0;
+    color: var(--blue); cursor: pointer;
+    font-size: 13px; font-weight: 700; font-family: inherit;
+    padding: 5px 12px;
+    border-radius: var(--radius);
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .btn-edit:hover { background: var(--blue); color: #fff; border-color: var(--blue); }
+  .listing-item.editing { border-color: #f59e0b; border-left-color: #f59e0b; box-shadow: 0 0 0 3px rgba(245,158,11,0.18); }
+  .edit-banner {
+    display: none;
+    background: #fff8e6; border: 1px solid #f5d27a; color: #8a5a00;
+    border-radius: var(--radius); padding: 10px 12px;
+    font-size: 13px; font-weight: 600; margin-bottom: 16px; line-height: 1.5;
+  }
+  .sidebar.edit-mode .edit-banner { display: block; }
+  .sidebar.edit-mode .btn-full.primary { background: #d97706; }
+  .sidebar.edit-mode .btn-full.primary:hover { background: #b45309; }
   .btn-delete:hover { color: var(--danger); border-color: var(--danger); background: #fff5f5; }
 
   .empty-state {
@@ -361,8 +382,9 @@
 
   <div class="admin-layout">
     <!-- Form sidebar -->
-    <div class="sidebar">
-      <h2>새 매물 등록</h2>
+    <div class="sidebar" id="sidebar">
+      <h2 id="formTitle">새 매물 등록</h2>
+      <div class="edit-banner" id="editBanner"></div>
       <div class="form-row">
         <label>유형</label>
         <select id="listingType">
@@ -494,7 +516,51 @@ async function ensureLabel(name, color) {
   } catch (_) {}
 }
 
-// ── Create Listing ──
+// ── Edit mode ──
+let editingIssue = null; // 수정 중인 매물 (null이면 신규 등록)
+
+function enterEditMode(issue) {
+  editingIssue = issue;
+  const isBuy = issue.labels.some(l => l.name === 'buy');
+  document.getElementById('listingType').value  = isBuy ? 'buy' : 'sell';
+  document.getElementById('listingTitle').value = issue.title;
+  document.getElementById('listingBody').value  = issue.body || '';
+  document.getElementById('sidebar').classList.add('edit-mode');
+  document.getElementById('formTitle').textContent = '매물 수정';
+  document.getElementById('editBanner').textContent = `✏️ 수정 중: #${issue.number} ${issue.title}`;
+  document.getElementById('submitBtn').textContent = '수정 저장';
+  document.getElementById('clearBtn').textContent  = '수정 취소';
+  document.querySelectorAll('.listing-item').forEach(c => c.classList.toggle('editing', c.dataset.id == issue.number));
+  document.getElementById('sidebar').scrollTop = 0;
+  if (window.innerWidth <= 768) document.getElementById('sidebar').scrollIntoView({ behavior: 'smooth' });
+  document.getElementById('listingTitle').focus();
+}
+
+function exitEditMode() {
+  editingIssue = null;
+  document.getElementById('listingTitle').value = '';
+  document.getElementById('listingBody').value  = '';
+  document.getElementById('listingType').value  = 'sell';
+  document.getElementById('sidebar').classList.remove('edit-mode');
+  document.getElementById('formTitle').textContent = '새 매물 등록';
+  document.getElementById('submitBtn').textContent = '매물 등록';
+  document.getElementById('clearBtn').textContent  = '초기화';
+  document.querySelectorAll('.listing-item.editing').forEach(c => c.classList.remove('editing'));
+}
+
+async function updateListing(issue, title, body, type) {
+  // sell/buy 외의 기존 라벨은 유지
+  const keep = issue.labels.map(l => l.name).filter(n => n !== 'sell' && n !== 'buy' && n !== LABEL_LISTING);
+  const labels = [LABEL_LISTING, type, ...keep];
+  const res = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/issues/${issue.number}`, {
+    method: 'PATCH',
+    headers: ghHeaders(),
+    body: JSON.stringify({ title, body, labels })
+  });
+  if (!res.ok) throw new Error();
+}
+
+// ── Create / Update Listing ──
 document.getElementById('submitBtn').addEventListener('click', async () => {
   const title = document.getElementById('listingTitle').value.trim();
   const body  = document.getElementById('listingBody').value.trim();
@@ -502,10 +568,19 @@ document.getElementById('submitBtn').addEventListener('click', async () => {
   if (!title) { showToast('제목을 입력하세요.', 'error'); return; }
   if (!body)  { showToast('내용을 입력하세요.', 'error'); return; }
 
-  document.getElementById('submitBtn').textContent = '등록 중...';
+  const isEdit = !!editingIssue;
+  document.getElementById('submitBtn').textContent = isEdit ? '저장 중...' : '등록 중...';
   document.getElementById('submitBtn').disabled = true;
 
   try {
+    if (isEdit) {
+      await ensureLabel(type, type === 'buy' ? '27ae60' : '0056b3');
+      await updateListing(editingIssue, title, body, type);
+      showToast('매물이 수정되었습니다.', 'success');
+      exitEditMode();
+      await loadListings();
+      return;
+    }
     await ensureLabel(LABEL_LISTING, '0056b3');
     await ensureLabel('sell', '0056b3');
     await ensureLabel('buy',  '27ae60');
@@ -523,14 +598,15 @@ document.getElementById('submitBtn').addEventListener('click', async () => {
     document.getElementById('listingBody').value  = '';
     await loadListings();
   } catch (e) {
-    showToast('등록 중 오류가 발생했습니다.', 'error');
+    showToast(isEdit ? '수정 중 오류가 발생했습니다.' : '등록 중 오류가 발생했습니다.', 'error');
   } finally {
-    document.getElementById('submitBtn').textContent = '매물 등록';
+    document.getElementById('submitBtn').textContent = editingIssue ? '수정 저장' : '매물 등록';
     document.getElementById('submitBtn').disabled = false;
   }
 });
 
 document.getElementById('clearBtn').addEventListener('click', () => {
+  if (editingIssue) { exitEditMode(); return; }
   document.getElementById('listingTitle').value = '';
   document.getElementById('listingBody').value  = '';
 });
@@ -591,7 +667,8 @@ async function loadListings() {
       const bodyText = (issue.body || '').trim();
 
       const card = document.createElement('div');
-      card.className = 'listing-item' + (isBuy ? ' listing-item-buy' : '');
+      card.className = 'listing-item' + (isBuy ? ' listing-item-buy' : '') + (editingIssue && editingIssue.number === issue.number ? ' editing' : '');
+      card.dataset.id = issue.number;
 
       card.innerHTML = `
         <div class="listing-item-header">
@@ -602,6 +679,7 @@ async function loadListings() {
           </div>
           <div class="listing-item-actions">
             <span class="listing-item-date">${date}</span>
+            <button class="btn-edit" data-id="${issue.number}">수정</button>
             <button class="btn-delete" data-id="${issue.number}">삭제</button>
           </div>
         </div>
@@ -619,6 +697,7 @@ async function loadListings() {
         </div>
       `;
 
+      card.querySelector('.btn-edit').addEventListener('click', () => enterEditMode(issue));
       card.querySelector('.btn-delete').addEventListener('click', () => deleteListing(issue.number));
       card.querySelector('.vc-set-btn').addEventListener('click', async () => {
         const btn = card.querySelector('.vc-set-btn');
@@ -662,6 +741,7 @@ async function deleteListing(issueNumber) {
       { method: 'PATCH', headers: ghHeaders(), body: JSON.stringify({ state: 'closed' }) }
     );
     if (!res.ok) throw new Error();
+    if (editingIssue && editingIssue.number === issueNumber) exitEditMode();
     showToast('매물이 삭제되었습니다.', 'success');
     await loadListings();
   } catch (e) {
