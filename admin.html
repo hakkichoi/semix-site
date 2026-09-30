@@ -313,6 +313,32 @@
   .sidebar.edit-mode .edit-banner { display: block; }
   .sidebar.edit-mode .btn-full.primary { background: #d97706; }
   .sidebar.edit-mode .btn-full.primary:hover { background: #b45309; }
+  .btn-done {
+    background: #ecfdf3; border: 1px solid #b7e4c7; color: #15803d;
+    cursor: pointer; font-size: 13px; font-weight: 700; font-family: inherit;
+    padding: 5px 12px; border-radius: var(--radius); transition: all 0.15s; white-space: nowrap;
+  }
+  .btn-done:hover { background: #16a34a; color: #fff; border-color: #16a34a; }
+  .btn-restore {
+    background: #f1f5f9; border: 1px solid #cbd5e1; color: #475569;
+    cursor: pointer; font-size: 13px; font-weight: 700; font-family: inherit;
+    padding: 5px 12px; border-radius: var(--radius); transition: all 0.15s; white-space: nowrap;
+  }
+  .btn-restore:hover { background: #475569; color: #fff; border-color: #475569; }
+  .badge-done { background: #334155; color: #fff; }
+  .listing-item-done { border-left-color: #64748b; }
+  .done-date { font-size: 12px; color: #15803d; font-weight: 700; white-space: nowrap; }
+
+  /* 탭 */
+  .panel-tabs { display: flex; gap: 6px; }
+  .panel-tab {
+    background: var(--canvas); border: 1px solid var(--hairline); color: var(--ink-light);
+    font-family: inherit; font-size: 14px; font-weight: 700;
+    padding: 8px 16px; border-radius: 20px; cursor: pointer; transition: all 0.15s;
+  }
+  .panel-tab:hover { border-color: var(--blue); color: var(--blue); }
+  .panel-tab.active { background: var(--blue); border-color: var(--blue); color: #fff; }
+  .panel-tab.active.tab-done { background: #334155; border-color: #334155; }
   .btn-delete:hover { color: var(--danger); border-color: var(--danger); background: #fff5f5; }
 
   .empty-state {
@@ -417,7 +443,10 @@
     <!-- Main panel -->
     <div class="main-panel">
       <div class="main-panel-header">
-        <h2>등록된 매물 목록</h2>
+        <div class="panel-tabs">
+          <button class="panel-tab active" data-tab="open">진행 중 매물</button>
+          <button class="panel-tab tab-done" data-tab="completed">거래완료 내역</button>
+        </div>
         <span class="listing-count" id="listingCount"></span>
       </div>
       <div class="listings-table" id="listingsTable">
@@ -435,6 +464,16 @@ const GITHUB_OWNER = 'hakkichoi';
 const GITHUB_REPO  = 'semix-site';
 const LABEL_LISTING = 'listing';
 const TOKEN_KEY     = 'semix_admin_token';
+const LABEL_DONE    = 'completed';   // 거래완료 라벨
+let currentTab = 'open';             // 'open' | 'completed'
+
+document.querySelectorAll('.panel-tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    currentTab = btn.dataset.tab;
+    document.querySelectorAll('.panel-tab').forEach(b => b.classList.toggle('active', b === btn));
+    loadListings();
+  });
+});
 
 let GH_TOKEN = '';
 
@@ -645,13 +684,15 @@ async function loadListings() {
   if (countEl) countEl.textContent = '';
   try {
     const res = await fetch(
-      `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/issues?labels=${LABEL_LISTING}&state=open&per_page=50`,
+      currentTab === 'completed'
+        ? `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/issues?labels=${LABEL_LISTING},${LABEL_DONE}&state=closed&sort=updated&per_page=100`
+        : `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/issues?labels=${LABEL_LISTING}&state=open&per_page=50`,
       { headers: ghHeaders() }
     );
     const issues = await res.json();
 
     if (!Array.isArray(issues) || issues.length === 0) {
-      table.innerHTML = '<div class="empty-state">등록된 매물이 없습니다.</div>';
+      table.innerHTML = `<div class="empty-state">${currentTab === 'completed' ? '거래완료된 매물이 없습니다.' : '등록된 매물이 없습니다.'}</div>`;
       if (countEl) countEl.textContent = '0건';
       return;
     }
@@ -667,19 +708,27 @@ async function loadListings() {
       const bodyText = (issue.body || '').trim();
 
       const card = document.createElement('div');
-      card.className = 'listing-item' + (isBuy ? ' listing-item-buy' : '') + (editingIssue && editingIssue.number === issue.number ? ' editing' : '');
+      const isDone = currentTab === 'completed';
+      const doneDate = isDone && issue.closed_at ? new Date(issue.closed_at).toLocaleDateString('ko-KR') : '';
+      card.className = 'listing-item' + (isBuy ? ' listing-item-buy' : '') + (isDone ? ' listing-item-done' : '') + (editingIssue && editingIssue.number === issue.number ? ' editing' : '');
       card.dataset.id = issue.number;
 
       card.innerHTML = `
         <div class="listing-item-header">
           <div class="listing-item-left">
+            ${isDone ? '<span class="row-badge badge-done">거래완료</span>' : ''}
             ${isSell ? '<span class="row-badge badge-sell">판매</span>' : ''}
             ${isBuy  ? '<span class="row-badge badge-buy">구매</span>'  : ''}
             <span class="listing-item-title">${escHtml(issue.title)}</span>
           </div>
           <div class="listing-item-actions">
-            <span class="listing-item-date">${date}</span>
+            ${isDone
+              ? `<span class="done-date">완료 ${doneDate}</span>`
+              : `<span class="listing-item-date">${date}</span>`}
             <button class="btn-edit" data-id="${issue.number}">수정</button>
+            ${isDone
+              ? `<button class="btn-restore" data-id="${issue.number}">진행중으로 복구</button>`
+              : `<button class="btn-done" data-id="${issue.number}">거래완료</button>`}
             <button class="btn-delete" data-id="${issue.number}">삭제</button>
           </div>
         </div>
@@ -698,7 +747,9 @@ async function loadListings() {
       `;
 
       card.querySelector('.btn-edit').addEventListener('click', () => enterEditMode(issue));
-      card.querySelector('.btn-delete').addEventListener('click', () => deleteListing(issue.number));
+      card.querySelector('.btn-delete').addEventListener('click', () => deleteListing(issue));
+      if (isDone) card.querySelector('.btn-restore').addEventListener('click', () => restoreListing(issue));
+      else        card.querySelector('.btn-done').addEventListener('click', () => completeListing(issue));
       card.querySelector('.vc-set-btn').addEventListener('click', async () => {
         const btn = card.querySelector('.vc-set-btn');
         const inputVal = parseInt(document.getElementById('vc-input-' + issue.number).value);
@@ -733,12 +784,53 @@ async function loadListings() {
 }
 
 // ── Delete Listing ──
-async function deleteListing(issueNumber) {
-  if (!confirm('이 매물을 삭제(닫기)하시겠습니까?')) return;
+function labelNames(issue) { return issue.labels.map(l => l.name); }
+
+async function patchIssue(number, data) {
+  const res = await fetch(
+    `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/issues/${number}`,
+    { method: 'PATCH', headers: ghHeaders(), body: JSON.stringify(data) }
+  );
+  if (!res.ok) throw new Error();
+}
+
+// ── 거래완료 처리 ──
+async function completeListing(issue) {
+  if (!confirm(`"${issue.title}"\n\n이 매물을 거래완료로 처리하시겠습니까?\n홈페이지의 매물 현황에서 빠지고 '거래완료 내역'에 표시됩니다.`)) return;
   try {
+    await ensureLabel(LABEL_DONE, '64748b');
+    const labels = [...new Set([...labelNames(issue), LABEL_DONE])];
+    await patchIssue(issue.number, { state: 'closed', state_reason: 'completed', labels });
+    if (editingIssue && editingIssue.number === issue.number) exitEditMode();
+    showToast('거래완료로 처리되었습니다.', 'success');
+    await loadListings();
+  } catch (e) {
+    showToast('거래완료 처리 중 오류가 발생했습니다.', 'error');
+  }
+}
+
+// ── 진행중으로 복구 ──
+async function restoreListing(issue) {
+  if (!confirm(`"${issue.title}"\n\n이 매물을 다시 진행 중 매물로 복구하시겠습니까?`)) return;
+  try {
+    const labels = labelNames(issue).filter(n => n !== LABEL_DONE);
+    await patchIssue(issue.number, { state: 'open', labels });
+    if (editingIssue && editingIssue.number === issue.number) exitEditMode();
+    showToast('진행 중 매물로 복구되었습니다.', 'success');
+    await loadListings();
+  } catch (e) {
+    showToast('복구 중 오류가 발생했습니다.', 'error');
+  }
+}
+
+async function deleteListing(issue) {
+  const issueNumber = issue.number;
+  if (!confirm('이 매물을 삭제하시겠습니까?\n(홈페이지와 거래완료 내역 어디에도 표시되지 않습니다)')) return;
+  try {
+    const labels = labelNames(issue).filter(n => n !== LABEL_DONE);
     const res = await fetch(
       `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/issues/${issueNumber}`,
-      { method: 'PATCH', headers: ghHeaders(), body: JSON.stringify({ state: 'closed' }) }
+      { method: 'PATCH', headers: ghHeaders(), body: JSON.stringify({ state: 'closed', state_reason: 'not_planned', labels }) }
     );
     if (!res.ok) throw new Error();
     if (editingIssue && editingIssue.number === issueNumber) exitEditMode();
