@@ -4,8 +4,8 @@
 User-agent: *
 Allow: /
 
-# 관리자 페이지는 검색 엔진에서 제외
-Disallow: /admin.html
+# 관리자 페이지(/admin.html)는 페이지 내 noindex 메타로 색인에서 제외
+# (Disallow 하면 크롤러가 noindex를 읽지 못하므로 막지 않음)
 
 # Sitemap 위치 명시
 Sitemap: https://semix.co.kr/sitemap.xml
