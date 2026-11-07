@@ -17,4 +17,18 @@
     <priority>0.7</priority>
   </url>
 
+  <!-- 개인정보처리방침 / 이용약관 -->
+  <url>
+    <loc>https://semix.co.kr/privacy.html</loc>
+    <lastmod>2026-11-08</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://semix.co.kr/terms.html</loc>
+    <lastmod>2026-11-08</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+
 </urlset>
