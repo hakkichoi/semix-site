@@ -167,15 +167,31 @@
     background: transparent; border: 2px solid transparent;
     border-radius: 8px; cursor: pointer; padding: 4px;
     font-size: 28px; line-height: 1; transition: all 0.2s;
-    opacity: 0.55; display: flex; align-items: center; justify-content: center;
+    color: #c5cdd8; font-weight: 700;  /* 국기 이모지가 글자(KR/US/CN)로 보이는 환경에서도 읽히도록 */
+    opacity: 0.8; display: flex; align-items: center; justify-content: center;
   }
-  .flag-btn:hover { opacity: 1; border-color: rgba(255,255,255,0.3); transform: scale(1.1); }
-  .flag-btn.active { opacity: 1; border-color: var(--blue); background: rgba(0,86,179,0.2); }
+  .flag-btn:hover { opacity: 1; color: #fff; border-color: rgba(255,255,255,0.4); transform: scale(1.1); }
+  .flag-btn:focus-visible { outline: 2px solid #60b0ff; outline-offset: 2px; }
+  .flag-btn.active { opacity: 1; color: #fff; border-color: #3d8bff; background: rgba(0,86,179,0.45); }
   .hero-lang-strip {
     display: flex; gap: 12px; align-items: center; justify-content: center;
     padding-top: 24px;
   }
-  .hero-lang-label { font-size: 11px; color: #555; letter-spacing: 0.1em; text-transform: uppercase; margin-right: 4px; }
+  .hero-lang-label { font-size: 12px; color: #aab4c2; letter-spacing: 0.1em; text-transform: uppercase; margin-right: 4px; }
+
+  /* ── SEMIXClub 바로가기 ── */
+  .hero-club { display: flex; flex-direction: column; align-items: center; gap: 10px; padding-top: 22px; text-align: center; }
+  .hero-club-title { font-size: 15px; font-weight: 700; color: #e8edf3; line-height: 1.4; }
+  .hero-club-link {
+    display: inline-flex; align-items: center; gap: 12px; text-decoration: none;
+    border: 1px solid rgba(96,176,255,0.45); border-radius: 999px; padding: 8px 8px 8px 18px;
+    background: rgba(0,86,179,0.18); transition: background 0.2s, border-color 0.2s;
+  }
+  .hero-club-link:hover { background: rgba(0,86,179,0.4); border-color: #60b0ff; }
+  .hero-club-link:focus-visible { outline: 2px solid #60b0ff; outline-offset: 3px; }
+  .hero-club-domain { font-size: 14px; font-weight: 600; color: #9fd0ff; letter-spacing: 0.02em; }
+  .hero-club-go { font-size: 13px; font-weight: 700; color: #fff; background: var(--blue); border-radius: 999px; padding: 6px 14px; }
+  .hero-club-go::after { content: ' →'; }
 
   /* ── Nav ── */
   nav {
@@ -703,6 +719,13 @@
       <button class="flag-btn"        data-lang="en" title="English" aria-label="English">🇺🇸</button>
       <button class="flag-btn"        data-lang="zh" title="中文" aria-label="中文">🇨🇳</button>
     </div>
+    <div class="hero-club">
+      <p class="hero-club-title" data-i18n="hero.clubTitle">반도체 거래의 새로운 정보 공유 플랫폼</p>
+      <a class="hero-club-link" href="https://www.semixclub.com" target="_blank" rel="noopener">
+        <span class="hero-club-domain">www.semixclub.com</span>
+        <span class="hero-club-go" data-i18n="hero.clubGo">바로가기</span>
+      </a>
+    </div>
   </div>
 </section>
 
@@ -995,7 +1018,7 @@ const I18N = {
     'hero.eyebrow':'World Semiconductor Wholesale',
     'hero.h1':'전세계 반도체·GPU<br /><em>도매 거래 플랫폼</em>',
     'hero.desc':'SEMIX는 KMC FOUNDATION이 운영하는 글로벌 반도체 부품·장비·GPU 도매 거래 플랫폼입니다. 19개국 파트너 네트워크를 기반으로 NVIDIA GPU, AI 서버, 반도체 부품·장비의 구매 및 판매를 연결합니다.',
-    'hero.cta1':'매물 현황 보기','hero.cta2':'거래 문의','hero.langLabel':'언어 선택',
+    'hero.cta1':'매물 현황 보기','hero.cta2':'거래 문의','hero.langLabel':'언어 선택','hero.clubTitle':'반도체 거래의 새로운 정보 공유 플랫폼','hero.clubGo':'바로가기',
     'stat.countries':'글로벌 파트너 국가','stat.gpu':'NVIDIA 공식 중개','stat.b2b':'기업 간 도매 거래','stat.response':'신속한 문의 응대',
     'services.eyebrow':'Services','services.title':'주요 취급 품목 및 서비스','services.sub':'반도체 부품부터 NVIDIA GPU·AI 서버까지, 글로벌 공급망을 통해 최적의 거래를 연결합니다.',
     'card1.title':'NVIDIA GPU · AI 서버','card1.desc':'NVIDIA H100, A100, L40S, RTX 시리즈 GPU 및 DGX, HGX 기반 AI 서버의 도매 중개 판매를 제공합니다. 대량 구매·판매 모두 지원합니다.','card1.tag':'판매 · 구매',
@@ -1038,7 +1061,7 @@ const I18N = {
     'hero.eyebrow':'World Semiconductor Wholesale',
     'hero.h1':'Global Semiconductor &amp; GPU<br /><em>Wholesale Trading Platform</em>',
     'hero.desc':'SEMIX is a global wholesale trading platform for semiconductor components, equipment, and GPUs, operated by KMC FOUNDATION. Backed by a partner network spanning 19 countries, we connect buyers and sellers of NVIDIA GPUs, AI servers, and semiconductor parts worldwide.',
-    'hero.cta1':'View Listings','hero.cta2':'Inquire Now','hero.langLabel':'Language',
+    'hero.cta1':'View Listings','hero.cta2':'Inquire Now','hero.langLabel':'Language','hero.clubTitle':'A New Information-Sharing Platform for Semiconductor Trading','hero.clubGo':'Go',
     'stat.countries':'Global Partner Countries','stat.gpu':'NVIDIA Authorized Broker','stat.b2b':'B2B Wholesale Trading','stat.response':'Fast Inquiry Response',
     'services.eyebrow':'Services','services.title':'Products & Services','services.sub':'From semiconductor components to NVIDIA GPU and AI servers — we connect optimal deals through our global supply chain.',
     'card1.title':'NVIDIA GPU · AI Servers','card1.desc':'We broker wholesale deals for NVIDIA H100, A100, L40S, and RTX series GPUs, as well as DGX and HGX-based AI servers. Both bulk buying and selling are fully supported.','card1.tag':'Buy · Sell',
@@ -1081,7 +1104,7 @@ const I18N = {
     'hero.eyebrow':'全球半导体批发平台',
     'hero.h1':'全球半导体与GPU<br /><em>批发交易平台</em>',
     'hero.desc':'SEMIX 是由 KMC FOUNDATION 运营的全球半导体零部件、设备及GPU批发交易平台。依托覆盖19个国家的合作伙伴网络，为企业客户提供NVIDIA GPU、AI服务器及半导体元器件的买卖撮合服务。',
-    'hero.cta1':'查看在售清单','hero.cta2':'询价洽谈','hero.langLabel':'语言选择',
+    'hero.cta1':'查看在售清单','hero.cta2':'询价洽谈','hero.langLabel':'语言选择','hero.clubTitle':'半导体交易的全新信息共享平台','hero.clubGo':'前往',
     'stat.countries':'全球合作国家','stat.gpu':'NVIDIA 授权中间商','stat.b2b':'B2B 批发交易','stat.response':'快速响应询盘',
     'services.eyebrow':'服务项目','services.title':'主要产品与服务','services.sub':'从半导体元器件到NVIDIA GPU及AI服务器，我们通过全球供应链为您促成最优交易。',
     'card1.title':'NVIDIA GPU · AI 服务器','card1.desc':'提供 NVIDIA H100、A100、L40S、RTX 系列 GPU 及基于 DGX、HGX 的 AI 服务器批发中介服务，支持大批量采购与销售。','card1.tag':'销售 · 采购',
