@@ -554,6 +554,42 @@
   .form-row textarea { resize: vertical; min-height: 100px; }
   .form-note { font-size: 12px; color: #aaa; margin-top: 12px; }
 
+  /* ── 문의 폼: 언어 선택 / 제목 / 파일 첨부 ── */
+  .form-lang { display: flex; gap: 8px; margin-bottom: 18px; flex-wrap: wrap; }
+  .form-lang-btn {
+    background: #fff; border: 1px solid #c9ced6; color: #333; font-family: inherit;
+    font-size: 13px; font-weight: 600; padding: 6px 14px; border-radius: 999px; cursor: pointer;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+  }
+  .form-lang-btn:hover { border-color: var(--blue); color: var(--blue); }
+  .form-lang-btn:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+  .form-lang-btn.active { background: var(--blue); border-color: var(--blue); color: #fff; }
+  .form-title { font-size: 20px; font-weight: 700; color: var(--ink); margin-bottom: 20px; line-height: 1.3; }
+
+  .file-box { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; position: relative; }
+  .form-row input.file-picker { position: absolute; width: 1px; height: 1px; padding: 0; border: 0; opacity: 0; overflow: hidden; clip: rect(0 0 0 0); }
+  .form-row label.file-btn {
+    display: inline-flex; align-items: center; margin: 0; cursor: pointer; font-size: 13px; font-weight: 700;
+    color: var(--blue); background: #fff; border: 1px solid var(--blue); border-radius: var(--radius); padding: 9px 16px;
+    transition: background 0.15s;
+  }
+  .form-row label.file-btn:hover { background: #eaf2fb; }
+  .file-box:focus-within .file-btn { outline: 2px solid var(--blue); outline-offset: 2px; }
+  .file-hint { font-size: 12px; color: #666; line-height: 1.5; margin: 6px 0 0; }
+  .file-box .file-hint { margin: 0; }
+  .file-list { list-style: none; margin: 10px 0 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+  .file-item { display: flex; align-items: center; gap: 10px; background: #fff; border: 1px solid var(--hairline); border-radius: var(--radius); padding: 8px 10px; font-size: 13px; }
+  .file-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ink); }
+  .file-size { color: #666; white-space: nowrap; font-size: 12px; }
+  .file-del { border: none; background: none; color: #b3261e; cursor: pointer; font-size: 16px; line-height: 1; padding: 2px 4px; }
+  .file-del:focus-visible { outline: 2px solid #b3261e; border-radius: 2px; }
+  .file-total { font-size: 12px; color: #555; margin: 8px 0 0; }
+  .file-total:empty, .file-msg:empty { display: none; }
+  .file-msg { font-size: 12px; margin: 8px 0 0; white-space: pre-line; line-height: 1.5; }
+  .file-msg.err { color: #b3261e; }
+  .file-msg.info { color: #0056b3; }
+  button[type="submit"]:disabled { opacity: 0.6; cursor: wait; }
+
   /* ── NVIDIA ── */
   .nvidia-outer { background: var(--canvas-dark); padding: var(--section-gap) 32px; }
   .nvidia-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; max-width: 1200px; margin: 0 auto; }
@@ -933,7 +969,14 @@
         <div class="contact-detail"><span class="contact-detail-label" data-i18n="contact.replyLabel">응대</span><span class="contact-detail-value" data-i18n="contact.replyVal">문의 접수 후 24시간 내 회신</span></div>
       </div>
       <div class="contact-form-wrap">
-        <form action="https://formsubmit.co/choihakki@gmail.com" method="POST">
+        <!-- 문의 폼 상단 언어 선택 -->
+        <div class="form-lang" role="group" aria-label="Language">
+          <button type="button" class="form-lang-btn active" data-lang="ko">한국어</button>
+          <button type="button" class="form-lang-btn" data-lang="en">English</button>
+          <button type="button" class="form-lang-btn" data-lang="zh">中文</button>
+        </div>
+        <h3 class="form-title" data-i18n="form.title">문의 및 요청하기</h3>
+        <form action="https://formsubmit.co/choihakki@gmail.com" method="POST" enctype="multipart/form-data">
           <input type="hidden" name="_subject" value="[SEMIX] 신규 거래 문의" />
           <input type="hidden" name="_captcha" value="false" />
           <input type="hidden" name="_next" value="https://semix.co.kr/?sent=1" />
@@ -946,11 +989,29 @@
               <option value="buy"    data-i18n="form.typeBuy">구매 문의</option>
               <option value="sell"   data-i18n="form.typeSell">판매 문의</option>
               <option value="nvidia" data-i18n="form.typeNvidia">NVIDIA GPU · 서버 문의</option>
+              <option value="chip"   data-i18n="form.typeChip">Chip (칩) 문의</option>
+              <option value="module" data-i18n="form.typeModule">Module (모듈) 문의</option>
               <option value="trade"  data-i18n="form.typeTrade">수출입 무역 문의</option>
               <option value="other"  data-i18n="form.typeOther">기타</option>
             </select>
           </div>
           <div class="form-row"><label for="fmsg" data-i18n="form.msgLabel">내용 *</label><textarea id="fmsg" name="message" required data-i18n-placeholder="form.msgPh" placeholder="품목, 수량, 희망 조건 등을 자세히 적어주세요."></textarea></div>
+          <div class="form-row">
+            <label for="ffile" data-i18n="form.fileLabel">파일 첨부 (선택)</label>
+            <div class="file-box">
+              <input type="file" id="ffile" class="file-picker" multiple accept=".jpg,.jpeg,.png,.webp,.gif,.bmp,.heic,.heif,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.csv,.txt,.hwp,.hwpx,.zip" />
+              <label for="ffile" class="file-btn" data-i18n="form.fileBtn">파일 선택</label>
+              <span class="file-hint" data-i18n="form.fileHint">이미지는 1MB 이하로 자동 조정 · 최대 3개 · 합계 5MB 이내</span>
+            </div>
+            <p class="file-hint" data-i18n="form.fileFormats">가능 형식: 이미지(JPG·PNG 등), PDF, Word·Excel·PowerPoint, 한글(HWP), TXT·CSV, ZIP</p>
+            <ul id="fileList" class="file-list"></ul>
+            <p id="fileTotal" class="file-total"></p>
+            <p id="fileMsg" class="file-msg" role="status" aria-live="polite"></p>
+          </div>
+          <!-- 실제 전송용 파일 칸 (JS가 선택된 파일을 채움, 비어 있으면 전송 제외) -->
+          <input type="file" name="attachment"  data-attach-slot hidden disabled />
+          <input type="file" name="attachment2" data-attach-slot hidden disabled />
+          <input type="file" name="attachment3" data-attach-slot hidden disabled />
           <button type="submit" class="btn-primary" style="width:100%;" data-i18n="form.submit">문의 전송</button>
           <p class="form-note" data-i18n="form.note">* 표시 항목은 필수입니다.</p>
         </form>
@@ -1036,7 +1097,7 @@ const I18N = {
     'about.label1':'운영사','about.label2':'글로벌 네트워크','about.val2':'19개국 파트너사','about.label3':'취급 품목','about.val3':'반도체 부품 · 장비 · NVIDIA GPU · AI 서버','about.label4':'거래 방식','about.val4':'B2B 도매 · 수출입 중개',
     'partners.label':'Global Partners & Brands',
     'contact.h2':'거래 문의 및<br />견적 요청','contact.desc':'구매·판매·수출입 문의를 남겨주시면 빠르게 검토 후 연락드립니다.','contact.opLabel':'운영사','contact.domLabel':'도메인','contact.replyLabel':'응대','contact.replyVal':'문의 접수 후 24시간 내 회신',
-    'form.nameLabel':'성함 / 회사명 *','form.namePh':'홍길동 / (주)ABC','form.emailLabel':'이메일 *','form.typeLabel':'문의 유형 *','form.typeDefault':'선택하세요','form.typeBuy':'구매 문의','form.typeSell':'판매 문의','form.typeNvidia':'NVIDIA GPU · 서버 문의','form.typeTrade':'수출입 무역 문의','form.typeOther':'기타','form.msgLabel':'내용 *','form.msgPh':'품목, 수량, 희망 조건 등을 자세히 적어주세요.','form.submit':'문의 전송','form.note':'* 표시 항목은 필수입니다.',
+    'form.nameLabel':'성함 / 회사명 *','form.namePh':'홍길동 / (주)ABC','form.emailLabel':'이메일 *','form.typeLabel':'문의 유형 *','form.typeDefault':'선택하세요','form.typeBuy':'구매 문의','form.typeSell':'판매 문의','form.typeNvidia':'NVIDIA GPU · 서버 문의','form.typeTrade':'수출입 무역 문의','form.typeOther':'기타','form.title':'문의 및 요청하기','form.typeChip':'Chip (칩) 문의','form.typeModule':'Module (모듈) 문의','form.fileLabel':'파일 첨부 (선택)','form.fileBtn':'파일 선택','form.fileHint':'이미지는 1MB 이하로 자동 조정 · 최대 3개 · 합계 5MB 이내','form.fileFormats':'가능 형식: 이미지(JPG·PNG 등), PDF, Word·Excel·PowerPoint, 한글(HWP), TXT·CSV, ZIP','file.busy':'이미지를 최적화하는 중입니다...','file.tooMany':'파일은 최대 3개까지 첨부할 수 있습니다.','file.badType':'{name}: 지원하지 않는 파일 형식입니다.','file.overTotal':'{name}: 첨부 합계 5MB를 초과하여 추가할 수 없습니다.','file.imgFail':'{name}: 이미지를 1MB 이하로 줄이지 못했습니다. JPG 또는 PNG로 변환해 올려주세요.','file.total':'첨부 합계','file.remove':'삭제','file.unsupported':'이 브라우저에서는 파일 첨부를 사용할 수 없습니다. 이메일로 보내주세요.','form.msgLabel':'내용 *','form.msgPh':'품목, 수량, 희망 조건 등을 자세히 적어주세요.','form.submit':'문의 전송','form.note':'* 표시 항목은 필수입니다.',
     'sent.msg':'문의가 전송되었습니다. 빠르게 연락드리겠습니다.',
     'process.eyebrow':'Process','process.title':'거래 진행 절차','process.sub':'문의부터 인도까지, SEMIX는 아래 순서로 거래를 지원합니다.',
     'step1.title':'문의 접수','step1.desc':'구매·판매·수출입 문의를 남겨주시면 품목, 수량, 희망 조건을 확인합니다. 문의 접수 후 24시간 내 회신드립니다.',
@@ -1079,7 +1140,7 @@ const I18N = {
     'about.label1':'Operator','about.label2':'Global Network','about.val2':'Partners in 19 Countries','about.label3':'Product Categories','about.val3':'Components · Equipment · NVIDIA GPU · AI Servers','about.label4':'Business Model','about.val4':'B2B Wholesale · Import/Export Brokerage',
     'partners.label':'Global Partners &amp; Brands',
     'contact.h2':'Trade Inquiries &amp;<br />Quote Requests','contact.desc':'Leave your buying, selling, or trade inquiry and we will review it promptly.','contact.opLabel':'Operator','contact.domLabel':'Website','contact.replyLabel':'Response','contact.replyVal':'Reply within 24 hours of inquiry',
-    'form.nameLabel':'Name / Company *','form.namePh':'John Doe / ABC Corp.','form.emailLabel':'Email *','form.typeLabel':'Inquiry Type *','form.typeDefault':'Select one','form.typeBuy':'Purchase Inquiry','form.typeSell':'Sales Inquiry','form.typeNvidia':'NVIDIA GPU · Server Inquiry','form.typeTrade':'Import/Export Trade Inquiry','form.typeOther':'Other','form.msgLabel':'Message *','form.msgPh':'Please provide details such as product, quantity, and desired terms.','form.submit':'Send Inquiry','form.note':'* Required fields.',
+    'form.nameLabel':'Name / Company *','form.namePh':'John Doe / ABC Corp.','form.emailLabel':'Email *','form.typeLabel':'Inquiry Type *','form.typeDefault':'Select one','form.typeBuy':'Purchase Inquiry','form.typeSell':'Sales Inquiry','form.typeNvidia':'NVIDIA GPU · Server Inquiry','form.typeTrade':'Import/Export Trade Inquiry','form.typeOther':'Other','form.title':'Inquiry & Request','form.typeChip':'Chip Inquiry','form.typeModule':'Module Inquiry','form.fileLabel':'Attachments (optional)','form.fileBtn':'Choose Files','form.fileHint':'Images are automatically resized to under 1MB · Up to 3 files · 5MB total','form.fileFormats':'Accepted: images (JPG, PNG, etc.), PDF, Word/Excel/PowerPoint, HWP, TXT/CSV, ZIP','file.busy':'Optimizing images...','file.tooMany':'You can attach up to 3 files.','file.badType':'{name}: This file type is not supported.','file.overTotal':'{name}: Cannot be added because attachments would exceed 5MB in total.','file.imgFail':'{name}: Could not reduce this image to under 1MB. Please convert it to JPG or PNG and try again.','file.total':'Total attachments','file.remove':'Remove','file.unsupported':'File attachments are not available in this browser. Please send files by email.','form.msgLabel':'Message *','form.msgPh':'Please provide details such as product, quantity, and desired terms.','form.submit':'Send Inquiry','form.note':'* Required fields.',
     'sent.msg':'Your inquiry has been sent. We will get back to you shortly.',
     'process.eyebrow':'Process','process.title':'How a Deal Works','process.sub':'From inquiry to delivery, SEMIX supports your transaction in the following steps.',
     'step1.title':'Inquiry','step1.desc':'Send us your purchase, sale, or import/export inquiry and we will confirm the item, quantity, and your preferred terms. We reply within 24 hours of receiving your inquiry.',
@@ -1122,7 +1183,7 @@ const I18N = {
     'about.label1':'运营方','about.label2':'全球网络','about.val2':'19个国家合作伙伴','about.label3':'产品类别','about.val3':'半导体元器件 · 设备 · NVIDIA GPU · AI服务器','about.label4':'商业模式','about.val4':'B2B批发 · 进出口中介',
     'partners.label':'全球合作伙伴与品牌',
     'contact.h2':'贸易询盘及<br />报价申请','contact.desc':'请留下您的采购、销售或贸易需求，我们将尽快审核并与您联系。','contact.opLabel':'运营方','contact.domLabel':'网站','contact.replyLabel':'响应时效','contact.replyVal':'收到询盘后24小时内回复',
-    'form.nameLabel':'姓名 / 公司名称 *','form.namePh':'张三 / ABC公司','form.emailLabel':'邮箱 *','form.typeLabel':'询盘类型 *','form.typeDefault':'请选择','form.typeBuy':'采购询盘','form.typeSell':'销售询盘','form.typeNvidia':'NVIDIA GPU · 服务器询盘','form.typeTrade':'进出口贸易询盘','form.typeOther':'其他','form.msgLabel':'内容 *','form.msgPh':'请详细说明产品、数量及期望条件等信息。','form.submit':'发送询盘','form.note':'* 为必填项。',
+    'form.nameLabel':'姓名 / 公司名称 *','form.namePh':'张三 / ABC公司','form.emailLabel':'邮箱 *','form.typeLabel':'询盘类型 *','form.typeDefault':'请选择','form.typeBuy':'采购询盘','form.typeSell':'销售询盘','form.typeNvidia':'NVIDIA GPU · 服务器询盘','form.typeTrade':'进出口贸易询盘','form.typeOther':'其他','form.title':'咨询与需求','form.typeChip':'芯片询盘','form.typeModule':'模块询盘','form.fileLabel':'附件（可选）','form.fileBtn':'选择文件','form.fileHint':'图片将自动压缩至 1MB 以内 · 最多 3 个文件 · 合计不超过 5MB','form.fileFormats':'支持格式：图片（JPG、PNG 等）、PDF、Word/Excel/PowerPoint、HWP、TXT/CSV、ZIP','file.busy':'正在优化图片...','file.tooMany':'最多可添加 3 个附件。','file.badType':'{name}：不支持该文件格式。','file.overTotal':'{name}：添加后附件合计将超过 5MB，无法添加。','file.imgFail':'{name}：无法将该图片压缩至 1MB 以内，请转换为 JPG 或 PNG 后重试。','file.total':'附件合计','file.remove':'删除','file.unsupported':'此浏览器不支持文件附件，请通过邮件发送文件。','form.msgLabel':'内容 *','form.msgPh':'请详细说明产品、数量及期望条件等信息。','form.submit':'发送询盘','form.note':'* 为必填项。',
     'sent.msg':'您的询盘已成功发送，我们将尽快与您联系。',
     'process.eyebrow':'流程','process.title':'交易流程','process.sub':'从询盘到交付，SEMIX 按以下步骤为您的交易提供支持。',
     'step1.title':'询盘受理','step1.desc':'请留下采购、销售或进出口询盘，我们将确认品类、数量和期望条件。收到询盘后 24 小时内回复。',
@@ -1205,14 +1266,14 @@ function applyLang(lang) {
   }, 120);
   currentLang = lang;
   try { localStorage.setItem('semix_lang', lang); } catch (_) {}
-  document.querySelectorAll('.lang-btn, .flag-btn').forEach(b => {
+  document.querySelectorAll('.lang-btn, .flag-btn, .form-lang-btn').forEach(b => {
     b.classList.toggle('active', b.dataset.lang === lang);
   });
 }
 function t(k) { return (I18N[currentLang]||I18N.ko)[k] || k; }
 
 // ── All lang buttons (text + flag) ──
-document.querySelectorAll('.lang-btn, .flag-btn').forEach(btn => {
+document.querySelectorAll('.lang-btn, .flag-btn, .form-lang-btn').forEach(btn => {
   btn.addEventListener('click', () => applyLang(btn.dataset.lang));
 });
 
@@ -1221,6 +1282,136 @@ try {
   const savedLang = localStorage.getItem('semix_lang');
   if (savedLang && savedLang !== 'ko' && I18N[savedLang]) applyLang(savedLang);
 } catch (_) {}
+
+// ══════════════════════════════════
+// 문의 폼 파일 첨부 — 이미지 1MB 자동 조정, 첨부 합계 5MB 제한
+// ══════════════════════════════════
+(function initInquiryAttachments() {
+  const MAX_IMG   = 1000000;   // 이미지 1MB
+  const MAX_TOTAL = 5000000;   // 첨부 합계 5MB
+  const MAX_FILES = 3;
+  const IMG_EXT = ['jpg','jpeg','png','webp','gif','bmp','heic','heif'];
+  const OK_EXT  = IMG_EXT.concat(['pdf','doc','docx','xls','xlsx','ppt','pptx','csv','txt','hwp','hwpx','zip']);
+
+  const picker  = document.getElementById('ffile');
+  const slots   = Array.from(document.querySelectorAll('input[data-attach-slot]'));
+  const listEl  = document.getElementById('fileList');
+  const totalEl = document.getElementById('fileTotal');
+  const msgEl   = document.getElementById('fileMsg');
+  const form    = picker ? picker.closest('.contact-form-wrap').querySelector('form') : null;
+  if (!picker || !slots.length || !listEl || !form) return;
+  const submitBtn = form.querySelector('button[type="submit"]');
+
+  function showMsg(text, kind) { msgEl.textContent = text; msgEl.className = 'file-msg ' + (kind || ''); }
+  function fmt(str, name) { return str.replace('{name}', name); }
+  function ext(name) { const i = name.lastIndexOf('.'); return i < 0 ? '' : name.slice(i + 1).toLowerCase(); }
+  function mb(bytes) { return bytes < 100000 ? Math.max(1, Math.round(bytes / 1000)) + 'KB' : (bytes / 1e6).toFixed(1) + 'MB'; }
+
+  let canAttach = true;
+  try { new DataTransfer(); } catch (_) { canAttach = false; }
+  if (!canAttach) { picker.disabled = true; showMsg(t('file.unsupported'), 'err'); return; }
+
+  const selected = [];   // { file, note }
+  let busy = 0;
+
+  function sync() {   // 선택된 파일을 실제 전송용 칸에 채움
+    slots.forEach((slot, i) => {
+      const dt = new DataTransfer();
+      if (selected[i]) dt.items.add(selected[i].file);
+      slot.files = dt.files;
+      slot.disabled = !selected[i];
+    });
+  }
+  function render() {
+    listEl.textContent = '';
+    let sum = 0;
+    selected.forEach((it, i) => {
+      sum += it.file.size;
+      const li = document.createElement('li'); li.className = 'file-item';
+      const nm = document.createElement('span'); nm.className = 'file-name'; nm.textContent = it.file.name; nm.title = it.file.name;
+      const sz = document.createElement('span'); sz.className = 'file-size'; sz.textContent = it.note || mb(it.file.size);
+      const del = document.createElement('button'); del.type = 'button'; del.className = 'file-del';
+      del.textContent = '✕'; del.setAttribute('aria-label', t('file.remove') + ': ' + it.file.name);
+      del.addEventListener('click', () => { selected.splice(i, 1); sync(); render(); showMsg('', ''); });
+      li.append(nm, sz, del); listEl.appendChild(li);
+    });
+    totalEl.textContent = selected.length ? t('file.total') + ' ' + mb(sum) + ' / 5MB' : '';
+  }
+
+  async function loadImage(file) {
+    if (window.createImageBitmap) { try { return await createImageBitmap(file); } catch (_) {} }
+    return new Promise((resolve, reject) => {
+      const url = URL.createObjectURL(file), img = new Image();
+      img.onload = () => { URL.revokeObjectURL(url); resolve(img); };
+      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('decode')); };
+      img.src = url;
+    });
+  }
+  // 이미지를 JPEG로 변환하며 해상도·품질을 단계적으로 낮춰 1MB 이하로 맞춤
+  async function shrinkImage(file) {
+    const src = await loadImage(file);
+    try {
+      const sw = src.naturalWidth || src.width, sh = src.naturalHeight || src.height;
+      let scale = Math.min(1, 2560 / Math.max(sw, sh));
+      const canvas = document.createElement('canvas'), ctx = canvas.getContext('2d');
+      for (let round = 0; round < 10; round++) {
+        const w = Math.max(1, Math.round(sw * scale)), h = Math.max(1, Math.round(sh * scale));
+        canvas.width = w; canvas.height = h;
+        ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, w, h);   // 투명 배경은 흰색으로
+        ctx.drawImage(src, 0, 0, w, h);
+        for (const q of [0.88, 0.78, 0.68, 0.58, 0.48]) {
+          const blob = await new Promise(r => canvas.toBlob(r, 'image/jpeg', q));
+          if (blob && blob.size <= MAX_IMG) {
+            const base = file.name.replace(/\.[^.]+$/, '') || 'image';
+            return new File([blob], base + '.jpg', { type: 'image/jpeg', lastModified: Date.now() });
+          }
+        }
+        scale *= 0.8;
+        if (Math.max(sw, sh) * scale < 320) break;
+      }
+      throw new Error('too-big');
+    } finally { if (src.close) src.close(); }
+  }
+
+  async function addFiles(files) {
+    const errs = [];
+    busy++; if (submitBtn) submitBtn.disabled = true;
+    showMsg(t('file.busy'), 'info');
+    try {
+      for (const f of files) {
+        if (selected.length >= MAX_FILES) { errs.push(t('file.tooMany')); break; }
+        const e = ext(f.name);
+        if (OK_EXT.indexOf(e) < 0) { errs.push(fmt(t('file.badType'), f.name)); continue; }
+        if (selected.some(it => it.src === f.name + ':' + f.size)) continue;   // 같은 파일 중복 방지
+        let file = f, note = '';
+        const isImg = IMG_EXT.indexOf(e) >= 0 || (f.type || '').indexOf('image/') === 0;
+        if (isImg && f.size > MAX_IMG) {
+          try { file = await shrinkImage(f); note = mb(f.size) + ' → ' + mb(file.size); }
+          catch (_) { errs.push(fmt(t('file.imgFail'), f.name)); continue; }
+        }
+        const used = selected.reduce((n, it) => n + it.file.size, 0);
+        if (used + file.size > MAX_TOTAL) { errs.push(fmt(t('file.overTotal'), f.name)); continue; }
+        selected.push({ file, note, src: f.name + ':' + f.size });
+      }
+    } finally {
+      busy--; if (!busy && submitBtn) submitBtn.disabled = false;
+    }
+    sync(); render();
+    showMsg(errs.join('\n'), errs.length ? 'err' : '');
+  }
+
+  picker.addEventListener('change', () => {
+    const files = Array.from(picker.files || []);
+    picker.value = '';   // 같은 파일을 다시 고를 수 있도록 초기화
+    if (files.length) addFiles(files);
+  });
+  form.addEventListener('submit', e => {
+    if (busy) { e.preventDefault(); showMsg(t('file.busy'), 'info'); }
+  });
+  // 언어 전환 시 목록의 문구도 새 언어로 갱신
+  document.querySelectorAll('.lang-btn, .flag-btn, .form-lang-btn').forEach(b =>
+    b.addEventListener('click', () => setTimeout(render, 250)));
+})();
 
 // ── Mobile menu ──
 document.getElementById('hamburgerBtn').addEventListener('click', () => {
